@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingredient-parser-deployment
+spec:
+  template:
+    metadata:
+      labels:
+        app: ingredient-parser
+    spec:
+      imagePullSecrets:
+      - name: gitlab-registry
+      containers:
+      - image: registry.gitlab.com/openculinary/ingredient-parser
+        imagePullPolicy: IfNotPresent
+        name: ingredient-parser
+        ports:
+        - containerPort: 80
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ingredient-parser

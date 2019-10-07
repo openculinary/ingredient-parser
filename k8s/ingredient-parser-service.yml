@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingredient-parser-service
+spec:
+  selector:
+    app: ingredient-parser
+  ports:
+    - protocol: TCP
+      port: 80
