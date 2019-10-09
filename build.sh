@@ -9,14 +9,12 @@ if [ -n "${GITLAB_USER_ID}" ]; then
     sed -i '/^mountopt =.*/d' /etc/containers/storage.conf
 fi
 
-container=$(buildah from docker.io/mtlynch/ingredient-phrase-tagger:latest)
+container=$(buildah from registry.gitlab.com/openculinary/ingredient-phrase-tagger:latest)
 buildah copy ${container} 'web' 'web'
 buildah copy ${container} 'Pipfile'
 buildah run ${container} -- pip install pipenv
 buildah run ${container} -- pipenv install
 buildah config --port 80 --entrypoint 'pipenv run gunicorn web.app:app --bind :80' ${container}
-buildah run ${container} -- mkdir model
-buildah run ${container} -- ./bin/train-prod-model model
 buildah commit --squash --rm ${container} ${IMAGE_NAME}:${IMAGE_COMMIT}
 
 if [ -n "${GITLAB_USER_ID}" ]; then
