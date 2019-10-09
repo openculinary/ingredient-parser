@@ -9,6 +9,8 @@ ingreedypy = "*"
 gunicorn = "*"
 
 [dev-packages]
+flake8 = "*"
+pytest = "==4.6.5"
 
 [requires]
 python_version = "2.7"
