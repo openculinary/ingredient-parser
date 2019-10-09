@@ -31,7 +31,7 @@ def parse_ingreedypy(ingredient):
     except Exception as e:
         try:
             result = Ingreedy().parse(ingredient[e.column():])
-        except:
+        except Exception:
             return
 
     return {
@@ -57,7 +57,8 @@ def merge_result_field(winner, field):
 
 
 def merge_results(a, b):
-    a_product = not b or a.get('product') and len(a['product']) <= len(b['product'])
+    a_product = not b or a.get('product') \
+        and len(a['product']) <= len(b['product'])
     a_quantity = not b or a.get('quantity')
     a_units = not b or a.get('units')
 
@@ -91,7 +92,7 @@ def parse_qty(value):
                 fragment = Fraction(fragment[:-1]) + numeric(fragment[-1])
             quantity += float(fragment)
         return quantity
-    except:
+    except Exception:
         return None
 
 
