@@ -1,11 +1,28 @@
 from flask import Flask, jsonify, request
 from fractions import Fraction
+import json
 from unicodedata import numeric
+from subprocess import Popen, PIPE
 
 from ingreedypy import Ingreedy
 
 
 app = Flask(__name__)
+
+
+def parse_nyt(ingredients):
+    env = {
+        'PATH': '/usr/bin:/usr/local/bin',
+        'PYTHONPATH': '..'
+    }
+    command = [
+        'bin/parse-ingredients.py',
+        '--model-file',
+        'model/20191009_1221-nyt-ingredients-snapshot-2015-91bf5a6.crfmodel',
+    ]
+    parser = Popen(command, env=env, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    out, err = parser.communicate('\n'.join(ingredients))
+    return json.loads(out)
 
 
 def parse_ingreedypy(ingredient):
@@ -84,9 +101,7 @@ def root():
     ingredients = [ingredient.encode('utf-8') for ingredient in ingredients]
     ingredients = [ingredient.strip().lower() for ingredient in ingredients]
 
-    # TODO: execute parse-ingredients.py
-
-    nyt_results = []
+    nyt_results = parse_nyt(ingredients)
     nyt_results = [{
         'parser': 'nyt',
         'description': nyt_result['input'],
