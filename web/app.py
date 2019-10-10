@@ -11,15 +11,8 @@ app = Flask(__name__)
 
 
 def parse_nyt(ingredients):
-    env = {
-        'PATH': '/usr/bin:/usr/local/bin',
-        'PYTHONPATH': '..'
-    }
-    command = [
-        'bin/parse-ingredients.py',
-        '--model-file',
-        'model/20191009_1221-nyt-ingredients-snapshot-2015-91bf5a6.crfmodel',
-    ]
+    env = {'PATH': '/usr/bin:/usr/local/bin', 'PYTHONPATH': '..'}
+    command = ['bin/parse-ingredients.py', '--model-file', 'model/latest']
     parser = Popen(command, env=env, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     out, err = parser.communicate('\n'.join(ingredients))
     return json.loads(out)
