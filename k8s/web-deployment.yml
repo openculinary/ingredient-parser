@@ -2,11 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ingredient-parser-deployment
+  labels:
+    app: ingredient-parser
 spec:
+  selector:
+    matchLabels:
+      app: ingredient-parser
+      role: web
   template:
     metadata:
       labels:
         app: ingredient-parser
+        role: web
     spec:
       imagePullSecrets:
       - name: gitlab-registry
@@ -17,6 +24,3 @@ spec:
         ports:
         - containerPort: 80
   replicas: 3
-  selector:
-    matchLabels:
-      app: ingredient-parser
