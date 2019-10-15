@@ -5,6 +5,7 @@ metadata:
 spec:
   selector:
     app: ingredient-parser
+    role: web
   ports:
     - protocol: TCP
       port: 80

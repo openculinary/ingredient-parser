@@ -4,7 +4,7 @@ metadata:
   name: ingredient-parser-ingress
 spec:
   rules:
-  - host: 'ingredient-parser'
+  - host: ingredient-parser
     http:
       paths:
       - backend:
