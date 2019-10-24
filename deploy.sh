@@ -1,5 +1,9 @@
+REGISTRY='registry.openculinary.org'
+PROJECT='reciperadar'
 SERVICE=$(basename `git rev-parse --show-toplevel`)
-COMMIT=$(git rev-parse --short HEAD)
+
+IMAGE_NAME=${REGISTRY}/${PROJECT}/${SERVICE}
+IMAGE_COMMIT=$(git rev-parse --short HEAD)
 
 kubectl apply -f k8s
-kubectl set image deployments -l app=${SERVICE} ${SERVICE}=registry.gitlab.com/openculinary/${SERVICE}:${COMMIT}
+kubectl set image deployments -l app=${SERVICE} ${SERVICE}=${IMAGE_NAME}:${IMAGE_COMMIT}
