@@ -1,2 +1,2 @@
 def test_request(client):
-    client.get('/')
+    client.post('/')

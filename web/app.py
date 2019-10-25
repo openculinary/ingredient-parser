@@ -89,9 +89,9 @@ def parse_qty(value):
         return None
 
 
-@app.route('/')
+@app.route('/', methods=['POST'])
 def root():
-    descriptions = request.args.getlist('descriptions[]')
+    descriptions = request.form.getlist('descriptions[]')
     descriptions = [d.encode('utf-8') for d in descriptions]
     descriptions = [d.strip().lower() for d in descriptions]
 
