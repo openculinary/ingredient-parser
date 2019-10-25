@@ -10,11 +10,11 @@ from ingreedypy import Ingreedy
 app = Flask(__name__)
 
 
-def parse_nyt(ingredients):
+def parse_nyt(descriptions):
     env = {'PATH': '/usr/bin:/usr/local/bin', 'PYTHONPATH': '..'}
     command = ['bin/parse-ingredients.py', '--model-file', 'model/latest']
     parser = Popen(command, env=env, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    out, err = parser.communicate('\n'.join(ingredients))
+    out, err = parser.communicate('\n'.join(descriptions))
     return json.loads(out)
 
 
@@ -91,11 +91,11 @@ def parse_qty(value):
 
 @app.route('/')
 def root():
-    ingredients = request.args.getlist('ingredients[]')
-    ingredients = [ingredient.encode('utf-8') for ingredient in ingredients]
-    ingredients = [ingredient.strip().lower() for ingredient in ingredients]
+    descriptions = request.args.getlist('descriptions[]')
+    descriptions = [d.encode('utf-8') for d in descriptions]
+    descriptions = [d.strip().lower() for d in descriptions]
 
-    nyt_results = parse_nyt(ingredients)
+    nyt_results = parse_nyt(descriptions)
     nyt_results = [{
         'parser': 'nyt',
         'description': nyt_result['input'],
@@ -104,9 +104,10 @@ def root():
         'units': nyt_result.get('unit'),
     } for nyt_result in nyt_results]
 
-    results = {}
+    results = []
     for nyt_result in nyt_results:
         description = nyt_result['description']
         igy_result = parse_ingreedypy(description)
-        results[description] = merge_results(nyt_result, igy_result)
+        result = merge_results(nyt_result, igy_result)
+        results.append(result)
     return jsonify(results)
