@@ -15,8 +15,6 @@ spec:
         app: ingredient-parser
         role: web
     spec:
-      imagePullSecrets:
-      - name: gitlab-registry
       containers:
       - image: registry.openculinary.org/reciperadar/ingredient-parser
         imagePullPolicy: IfNotPresent
