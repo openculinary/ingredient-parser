@@ -3,7 +3,7 @@
 prebuild: lint tests
 
 lint:
-	pipenv run flake8
+	flake8
 
 tests:
-	pipenv run pytest tests
+	pytest tests
