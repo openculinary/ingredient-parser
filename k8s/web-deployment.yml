@@ -21,4 +21,3 @@ spec:
         name: ingredient-parser
         ports:
         - containerPort: 80
-  replicas: 3
