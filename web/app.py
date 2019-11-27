@@ -60,34 +60,40 @@ def parse_quantity(value):
 
 def get_base_units(quantity):
     dimensionalities = {
+        None: unit_registry.Quantity(1),
         'length': unit_registry.Quantity(1, 'cm'),
         'volume': unit_registry.Quantity(1, 'ml'),
         'weight': unit_registry.Quantity(1, 'g'),
     }
     dimensionalities = {
-        v.dimensionality: unit_registry.get_symbol(str(v.units))
+        v.dimensionality: unit_registry.get_symbol(str(v.units)) if k else None
         for k, v in dimensionalities.items()
     }
     return dimensionalities.get(quantity.dimensionality)
 
 
 def parse_units(ingredient):
-    quantity = unit_registry.Quantity(
-        ingredient['quantity'],
-        ingredient['units']
-    )
+    try:
+        quantity = unit_registry.Quantity(
+            ingredient.get('quantity'),
+            ingredient.get('units')
+        )
+    except Exception:
+        return
 
     base_units = get_base_units(quantity)
-    if not base_units:
-        message = 'Could not find base units for quantity {}'.format(quantity)
-        raise TypeError(message)
+    if base_units:
+        quantity = quantity.to(base_units)
 
-    return {
-        'quantity': quantity.to(base_units).magnitude,
-        'quantity_parser': ingredient['parser'] + '+pint',
-        'units': unit_registry.get_symbol(base_units),
-        'units_parser': ingredient['parser'] + '+pint'
+    result = {
+        'quantity': quantity.magnitude,
+        'quantity_parser': ingredient['parser'] + '+pint'
     }
+    result.update({
+        'units': base_units,
+        'units_parser': ingredient['parser'] + '+pint'
+    } if base_units else {})
+    return result
 
 
 def merge_ingredient_field(winner, field):
@@ -121,18 +127,11 @@ def merge_ingredients(a, b):
         merge_field = merge_ingredient_field(winner, field)
         ingredient.update(merge_field)
 
-    try:
-        units_field = parse_units(a if a_units else b)
+    units_field = parse_units(a if a_units else b)
+    if not units_field:
+        units_field = parse_units(b if a_units else a)
+    if units_field:
         ingredient.update(units_field)
-    except TypeError:
-        raise
-    except Exception:
-        if b and b.get('units') and b.get('quantity'):
-            try:
-                units_field = parse_units(b if a_units else a)
-                ingredient.update(units_field)
-            except Exception:
-                pass
 
     return ingredient
 

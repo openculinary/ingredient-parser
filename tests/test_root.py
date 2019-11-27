@@ -115,10 +115,25 @@ def test_request(client):
     }]
 
 
+@patch('web.app.parse_descriptions_nyt', nyt_parser_stub)
+def test_request_dimensionless(client):
+    response = client.post('/', data={'descriptions[]': ['1 potato']})
+
+    assert response.json == [{
+        'description': '1 potato',
+        'product': {
+            'product': 'potato',
+            'product_parser': 'ingreedypy',
+        },
+        'quantity': 1,
+        'quantity_parser': 'ingreedypy+pint'
+    }]
+
+
 @patch('web.app.parse_units')
 @patch('web.app.parse_descriptions_nyt', nyt_parser_stub)
 def test_request_unit_parse_failure(parse_units, client):
-    parse_units.side_effect = [Exception]
+    parse_units.return_value = None
 
     response = client.post('/', data={'descriptions[]': ['100ml red wine']})
 
