@@ -31,7 +31,7 @@ def parse_description_ingreedypy(description):
 
     return {
         'parser': 'ingreedypy',
-        'input': description,
+        'description': description,
         'product': ingredient.get('ingredient'),
         'quantity': ingredient.get('amount'),
         'units': ingredient.get('unit'),
@@ -85,10 +85,10 @@ def merge_ingredient_field(winner, field):
 
 
 def merge_ingredients(a, b):
-    a_product = not b or a.get('product') \
+    a_product = not b or a and a.get('product') \
         and len(a['product']) <= len(b['product'])
-    a_quantity = not b or a.get('quantity')
-    a_units = not b or a.get('units')
+    a_quantity = not b or a and a.get('quantity')
+    a_units = not b or a and a.get('units')
 
     winners = {
         'product': a if a_product else b,
@@ -96,7 +96,7 @@ def merge_ingredients(a, b):
         'units': a if a_units else b,
     }
 
-    ingredient = {'description': a['description']}
+    ingredient = {'description': winners.values()[0]['description']}
     for field in ['product', 'quantity', 'units']:
         winner = winners[field]
         merge_field = merge_ingredient_field(winner, field)

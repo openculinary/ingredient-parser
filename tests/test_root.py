@@ -31,7 +31,7 @@ def parser_tests():
 
 @pytest.mark.parametrize('description, expected', parser_tests().items())
 def test_parse_description_ingreedypy(description, expected):
-    expected.update({'input': description, 'parser': 'ingreedypy'})
+    expected.update({'description': description, 'parser': 'ingreedypy'})
 
     result = parse_description_ingreedypy(description)
 
@@ -72,10 +72,11 @@ def test_merge_ingredient_unit_fallback_missing(sample_ingredient):
     ingredient_a = sample_ingredient.copy()
     ingredient_a.update({'parser': 'a'})
 
-    merged_ingredient = merge_ingredients(ingredient_a, None)
+    for args in [(ingredient_a, None), (None, ingredient_a)]:
+        merged_ingredient = merge_ingredients(*args)
 
-    assert merged_ingredient is not None
-    assert merged_ingredient['units_parser'] == 'a'
+        assert merged_ingredient is not None
+        assert merged_ingredient['units_parser'] == 'a'
 
 
 def nyt_parser_stub(descriptions):
