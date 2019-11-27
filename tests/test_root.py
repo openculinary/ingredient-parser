@@ -68,6 +68,16 @@ def test_merge_ingredient_unit_fallback(sample_ingredient):
     }
 
 
+def test_merge_ingredient_unit_fallback_missing(sample_ingredient):
+    ingredient_a = sample_ingredient.copy()
+    ingredient_a.update({'parser': 'a'})
+
+    merged_ingredient = merge_ingredients(ingredient_a, None)
+
+    assert merged_ingredient is not None
+    assert merged_ingredient['units_parser'] == 'a'
+
+
 def nyt_parser_stub(descriptions):
     return [{'input': description} for description in descriptions]
 

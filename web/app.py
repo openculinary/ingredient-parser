@@ -106,7 +106,7 @@ def merge_ingredients(a, b):
         units_field = parse_units(a if a_units else b)
         ingredient.update(units_field)
     except Exception:
-        if b.get('units') and b.get('quantity'):
+        if b and b.get('units') and b.get('quantity'):
             try:
                 units_field = parse_units(b if a_units else a)
                 ingredient.update(units_field)
