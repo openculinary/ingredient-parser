@@ -65,9 +65,9 @@ def parse_units(ingredient):
     ).to_compact()
     return {
         'quantity': quantity.magnitude,
-        'quantity_parser': ingredient['quantity_parser'] + '+pint',
+        'quantity_parser': ingredient['parser'] + '+pint',
         'units': unit_registry.get_symbol(str(quantity.units)),
-        'units_parser': ingredient['units_parser'] + '+pint'
+        'units_parser': ingredient['parser'] + '+pint'
     }
 
 
@@ -103,10 +103,15 @@ def merge_ingredients(a, b):
         ingredient.update(merge_field)
 
     try:
-        units_field = parse_units(ingredient)
+        units_field = parse_units(a if a_units else b)
         ingredient.update(units_field)
     except Exception:
-        pass
+        if b.get('units') and b.get('quantity'):
+            try:
+                units_field = parse_units(b if a_units else a)
+                ingredient.update(units_field)
+            except Exception:
+                pass
 
     return ingredient
 

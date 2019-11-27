@@ -1,7 +1,17 @@
 from mock import patch
 import pytest
 
-from web.app import parse_description_ingreedypy
+from web.app import merge_ingredients, parse_description_ingreedypy
+
+
+@pytest.fixture
+def sample_ingredient():
+    return {
+        'description': '1 block firm tofu',
+        'product': 'tofu',
+        'units': 'block',
+        'quantity': 1
+    }
 
 
 def parser_tests():
@@ -26,6 +36,36 @@ def test_parse_description_ingreedypy(description, expected):
     result = parse_description_ingreedypy(description)
 
     assert result == expected
+
+
+def test_merge_ingredient_unit_fallback(sample_ingredient):
+    ingredient_a = sample_ingredient.copy()
+    ingredient_a.update({
+        'parser': 'a',
+        'units': 'unparseable',
+        'quantity': 1
+    })
+
+    ingredient_b = sample_ingredient.copy()
+    ingredient_b.update({
+        'parser': 'b',
+        'units': 'g',
+        'quantity': 500
+    })
+
+    merged_ingredient = merge_ingredients(ingredient_a, ingredient_b)
+
+    assert merged_ingredient == {
+        'description': '1 block firm tofu',
+        'product': {
+            'product': 'tofu',
+            'product_parser': 'a'
+        },
+        'units': 'g',
+        'units_parser': 'b+pint',
+        'quantity': 500,
+        'quantity_parser': 'b+pint'
+    }
 
 
 def nyt_parser_stub(descriptions):
