@@ -20,19 +20,19 @@ def parse_descriptions_nyt(descriptions):
 
 def parse_description_ingreedypy(description):
     try:
-        result = Ingreedy().parse(description)
+        ingredient = Ingreedy().parse(description)
     except Exception as e:
         try:
-            result = Ingreedy().parse(description[e.column():])
+            ingredient = Ingreedy().parse(description[e.column():])
         except Exception:
             return
 
     return {
         'parser': 'ingreedypy',
         'input': description,
-        'product': result.get('ingredient'),
-        'quantity': result.get('amount'),
-        'units': result.get('unit'),
+        'product': ingredient.get('ingredient'),
+        'quantity': ingredient.get('amount'),
+        'units': ingredient.get('unit'),
     }
 
 
@@ -56,20 +56,20 @@ def parse_quantity(value):
         return None
 
 
-def merge_result_field(winner, field):
+def merge_ingredient_field(winner, field):
     if winner.get(field) is None:
         return {}
 
     nested_fields = {'product'}
     parser = '{}_parser'.format(field)
-    result = {
+    ingredient = {
         field: winner[field],
         parser: winner['parser'] if winner[field] else None,
     }
-    return {field: result} if field in nested_fields else result
+    return {field: ingredient} if field in nested_fields else ingredient
 
 
-def merge_results(a, b):
+def merge_ingredients(a, b):
     a_product = not b or a.get('product') \
         and len(a['product']) <= len(b['product'])
     a_quantity = not b or a.get('quantity')
@@ -81,12 +81,12 @@ def merge_results(a, b):
         'units': a if a_units else b,
     }
 
-    results = {'description': a['description']}
+    ingredient = {'description': a['description']}
     for field in ['product', 'quantity', 'units']:
         winner = winners[field]
-        result = merge_result_field(winner, field)
-        results = dict(results.items() + result.items())
-    return results
+        merge_field = merge_ingredient_field(winner, field)
+        ingredient.update(merge_field)
+    return ingredient
 
 
 @app.route('/', methods=['POST'])
@@ -95,19 +95,19 @@ def root():
     descriptions = [d.encode('utf-8') for d in descriptions]
     descriptions = [d.strip().lower() for d in descriptions]
 
-    nyt_results = parse_descriptions_nyt(descriptions)
-    nyt_results = [{
+    nyt_ingredients = parse_descriptions_nyt(descriptions)
+    nyt_ingredients = [{
         'parser': 'nyt',
-        'description': nyt_result['input'],
-        'product': nyt_result.get('name'),
-        'quantity': parse_quantity(nyt_result.get('qty')),
-        'units': nyt_result.get('unit'),
-    } for nyt_result in nyt_results]
+        'description': nyt_ingredient['input'],
+        'product': nyt_ingredient.get('name'),
+        'quantity': parse_quantity(nyt_ingredient.get('qty')),
+        'units': nyt_ingredient.get('unit'),
+    } for nyt_ingredient in nyt_ingredients]
 
-    results = []
-    for nyt_result in nyt_results:
-        description = nyt_result['description']
-        igy_result = parse_description_ingreedypy(description)
-        result = merge_results(nyt_result, igy_result)
-        results.append(result)
-    return jsonify(results)
+    ingredients = []
+    for nyt_ingredient in nyt_ingredients:
+        description = nyt_ingredient['description']
+        igy_ingredient = parse_description_ingreedypy(description)
+        ingredient = merge_ingredients(nyt_ingredient, igy_ingredient)
+        ingredients.append(ingredient)
+    return jsonify(ingredients)
