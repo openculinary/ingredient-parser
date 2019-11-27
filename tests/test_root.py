@@ -108,9 +108,9 @@ def test_request(client):
             'product': 'potatoes',
             'product_parser': 'ingreedypy',
         },
-        'units': 'kg',
+        'units': 'g',
         'units_parser': 'ingreedypy+pint',
-        'quantity': 1,
+        'quantity': 1000,
         'quantity_parser': 'ingreedypy+pint'
     }]
 

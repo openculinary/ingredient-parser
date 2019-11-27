@@ -58,15 +58,34 @@ def parse_quantity(value):
         return None
 
 
+def get_base_units(quantity):
+    dimensionalities = {
+        'length': unit_registry.Quantity(1, 'cm'),
+        'volume': unit_registry.Quantity(1, 'ml'),
+        'weight': unit_registry.Quantity(1, 'g'),
+    }
+    dimensionalities = {
+        v.dimensionality: unit_registry.get_symbol(str(v.units))
+        for k, v in dimensionalities.items()
+    }
+    return dimensionalities.get(quantity.dimensionality)
+
+
 def parse_units(ingredient):
     quantity = unit_registry.Quantity(
         ingredient['quantity'],
         ingredient['units']
-    ).to_compact()
+    )
+
+    base_units = get_base_units(quantity)
+    if not base_units:
+        message = 'Could not find base units for quantity {}'.format(quantity)
+        raise TypeError(message)
+
     return {
-        'quantity': quantity.magnitude,
+        'quantity': quantity.to(base_units).magnitude,
         'quantity_parser': ingredient['parser'] + '+pint',
-        'units': unit_registry.get_symbol(str(quantity.units)),
+        'units': unit_registry.get_symbol(base_units),
         'units_parser': ingredient['parser'] + '+pint'
     }
 
@@ -105,6 +124,8 @@ def merge_ingredients(a, b):
     try:
         units_field = parse_units(a if a_units else b)
         ingredient.update(units_field)
+    except TypeError:
+        raise
     except Exception:
         if b and b.get('units') and b.get('quantity'):
             try:
