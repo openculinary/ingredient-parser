@@ -10,7 +10,7 @@ from ingreedypy import Ingreedy
 app = Flask(__name__)
 
 
-def parse_nyt(descriptions):
+def parse_descriptions_nyt(descriptions):
     env = {'PATH': '/usr/bin:/usr/local/bin', 'PYTHONPATH': '..'}
     command = ['bin/parse-ingredients.py', '--model-file', 'model/latest']
     parser = Popen(command, env=env, stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -18,22 +18,42 @@ def parse_nyt(descriptions):
     return json.loads(out)
 
 
-def parse_ingreedypy(ingredient):
+def parse_description_ingreedypy(description):
     try:
-        result = Ingreedy().parse(ingredient)
+        result = Ingreedy().parse(description)
     except Exception as e:
         try:
-            result = Ingreedy().parse(ingredient[e.column():])
+            result = Ingreedy().parse(description[e.column():])
         except Exception:
             return
 
     return {
         'parser': 'ingreedypy',
-        'input': ingredient,
+        'input': description,
         'product': result.get('ingredient'),
         'quantity': result.get('amount'),
         'units': result.get('unit'),
     }
+
+
+def parse_quantity(value):
+    if value is None:
+        return
+
+    try:
+        quantity = 0
+        fragments = value.split()
+        for fragment in fragments:
+            if len(fragment) == 1:
+                fragment = numeric(fragment)
+            elif fragment[-1].isdigit():
+                fragment = Fraction(fragment)
+            else:
+                fragment = Fraction(fragment[:-1]) + numeric(fragment[-1])
+            quantity += float(fragment)
+        return quantity
+    except Exception:
+        return None
 
 
 def merge_result_field(winner, field):
@@ -69,45 +89,25 @@ def merge_results(a, b):
     return results
 
 
-def parse_qty(value):
-    if value is None:
-        return
-
-    try:
-        quantity = 0
-        fragments = value.split()
-        for fragment in fragments:
-            if len(fragment) == 1:
-                fragment = numeric(fragment)
-            elif fragment[-1].isdigit():
-                fragment = Fraction(fragment)
-            else:
-                fragment = Fraction(fragment[:-1]) + numeric(fragment[-1])
-            quantity += float(fragment)
-        return quantity
-    except Exception:
-        return None
-
-
 @app.route('/', methods=['POST'])
 def root():
     descriptions = request.form.getlist('descriptions[]')
     descriptions = [d.encode('utf-8') for d in descriptions]
     descriptions = [d.strip().lower() for d in descriptions]
 
-    nyt_results = parse_nyt(descriptions)
+    nyt_results = parse_descriptions_nyt(descriptions)
     nyt_results = [{
         'parser': 'nyt',
         'description': nyt_result['input'],
         'product': nyt_result.get('name'),
-        'quantity': parse_qty(nyt_result.get('qty')),
+        'quantity': parse_quantity(nyt_result.get('qty')),
         'units': nyt_result.get('unit'),
     } for nyt_result in nyt_results]
 
     results = []
     for nyt_result in nyt_results:
         description = nyt_result['description']
-        igy_result = parse_ingreedypy(description)
+        igy_result = parse_description_ingreedypy(description)
         result = merge_results(nyt_result, igy_result)
         results.append(result)
     return jsonify(results)
