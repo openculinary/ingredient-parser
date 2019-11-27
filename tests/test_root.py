@@ -34,12 +34,16 @@ def nyt_parser_stub(descriptions):
 
 @patch('web.app.parse_descriptions_nyt', nyt_parser_stub)
 def test_request(client):
-    response = client.post('/', data={'descriptions[]': ['tomato']})
+    response = client.post('/', data={'descriptions[]': ['100ml red wine']})
 
     assert response.json == [{
-        'description': 'tomato',
+        'description': '100ml red wine',
         'product': {
-            'product': 'tomato',
-            'product_parser': 'ingreedypy'
-        }
+            'product': 'red wine',
+            'product_parser': 'ingreedypy',
+        },
+        'units': 'milliliter',
+        'units_parser': 'ingreedypy',
+        'quantity': 100,
+        'quantity_parser': 'ingreedypy'
     }]
