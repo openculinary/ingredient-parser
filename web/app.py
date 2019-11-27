@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from fractions import Fraction
 import json
+from pint import UnitRegistry
 from unicodedata import numeric
 from subprocess import Popen, PIPE
 
@@ -8,6 +9,7 @@ from ingreedypy import Ingreedy
 
 
 app = Flask(__name__)
+unit_registry = UnitRegistry()
 
 
 def parse_descriptions_nyt(descriptions):
@@ -56,6 +58,19 @@ def parse_quantity(value):
         return None
 
 
+def parse_units(ingredient):
+    quantity = unit_registry.Quantity(
+        ingredient['quantity'],
+        ingredient['units']
+    ).to_compact()
+    return {
+        'quantity': quantity.magnitude,
+        'quantity_parser': ingredient['quantity_parser'] + '+pint',
+        'units': unit_registry.get_symbol(str(quantity.units)),
+        'units_parser': ingredient['units_parser'] + '+pint'
+    }
+
+
 def merge_ingredient_field(winner, field):
     if winner.get(field) is None:
         return {}
@@ -86,6 +101,13 @@ def merge_ingredients(a, b):
         winner = winners[field]
         merge_field = merge_ingredient_field(winner, field)
         ingredient.update(merge_field)
+
+    try:
+        units_field = parse_units(ingredient)
+        ingredient.update(units_field)
+    except Exception:
+        pass
+
     return ingredient
 
 
