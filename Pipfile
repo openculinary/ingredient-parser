@@ -7,10 +7,12 @@ name = "pypi"
 flask = "==1.1.1"
 ingreedypy = "==1.1"
 gunicorn = "==19.9.0"
+pint = "==0.9"
 
 [dev-packages]
 flake8 = "*"
 pytest = "==4.6.5"
+mock = "*"
 
 [requires]
 python_version = "2.7"
