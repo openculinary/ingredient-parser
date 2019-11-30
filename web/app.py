@@ -20,14 +20,24 @@ def parse_descriptions_nyt(descriptions):
     return json.loads(out)
 
 
+def generate_subtexts(description):
+    yield description
+    if '/' in description:
+        pre_text, post_text = description.split('/')
+        post_tokens = post_text.split(' ')
+        if pre_text:
+            yield '{} {}'.format(pre_text, ' '.join(post_tokens[1:]))
+        yield ' '.join(post_tokens)
+
+
 def parse_description_ingreedypy(description):
-    try:
-        ingredient = Ingreedy().parse(description)
-    except Exception as e:
+    ingreedy = Ingreedy()
+    ingredient = {}
+    for text in generate_subtexts(description):
         try:
-            ingredient = Ingreedy().parse(description[e.column():])
+            ingredient = ingreedy.parse(text)
         except Exception:
-            return
+            pass
 
     return {
         'parser': 'ingreedypy',
@@ -86,7 +96,7 @@ def parse_units(ingredient):
         quantity = quantity.to(base_units)
 
     result = {
-        'quantity': quantity.magnitude,
+        'quantity': int(quantity.magnitude),
         'quantity_parser': ingredient['parser'] + '+pint'
     }
     result.update({
