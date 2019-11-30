@@ -148,3 +148,44 @@ def test_request_unit_parse_failure(parse_units, client):
         'quantity': 100,
         'quantity_parser': 'ingreedypy'
     }]
+
+
+@patch('web.app.parse_descriptions_nyt', nyt_parser_stub)
+def test_parser_fallbacks(client):
+    response = client.post('/', data={'descriptions[]': [
+        '500g/1lb potatoes',
+        '1lb/500g potatoes',
+        '/500g potatoes',
+    ]})
+
+    assert response.json == [{
+        'description': '500g/1lb potatoes',
+        'product': {
+            'product': 'potatoes',
+            'product_parser': 'ingreedypy',
+        },
+        'quantity': 500,
+        'quantity_parser': 'ingreedypy+pint',
+        'units': 'g',
+        'units_parser': 'ingreedypy+pint'
+    }, {
+        'description': '1lb/500g potatoes',
+        'product': {
+            'product': 'potatoes',
+            'product_parser': 'ingreedypy',
+        },
+        'quantity': 453,
+        'quantity_parser': 'ingreedypy+pint',
+        'units': 'g',
+        'units_parser': 'ingreedypy+pint'
+    }, {
+        'description': '/500g potatoes',
+        'product': {
+            'product': 'potatoes',
+            'product_parser': 'ingreedypy',
+        },
+        'quantity': 500,
+        'quantity_parser': 'ingreedypy+pint',
+        'units': 'g',
+        'units_parser': 'ingreedypy+pint'
+    }]

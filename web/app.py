@@ -20,14 +20,24 @@ def parse_descriptions_nyt(descriptions):
     return json.loads(out)
 
 
+def generate_subtexts(description):
+    yield description
+    if '/' in description:
+        pre_text, post_text = description.split('/', 1)
+        post_tokens = post_text.split(' ')
+        if pre_text:
+            yield u'{} {}'.format(pre_text, u' '.join(post_tokens[1:]))
+        yield u' '.join(post_tokens)
+
+
 def parse_description_ingreedypy(description):
-    try:
-        ingredient = Ingreedy().parse(description)
-    except Exception as e:
+    ingreedy = Ingreedy()
+    ingredient = {}
+    for text in generate_subtexts(description):
         try:
-            ingredient = Ingreedy().parse(description[e.column():])
+            ingredient = ingreedy.parse(text)
         except Exception:
-            return
+            pass
 
     return {
         'parser': 'ingreedypy',
@@ -86,7 +96,7 @@ def parse_units(ingredient):
         quantity = quantity.to(base_units)
 
     result = {
-        'quantity': quantity.magnitude,
+        'quantity': int(quantity.magnitude),
         'quantity_parser': ingredient['parser'] + '+pint'
     }
     result.update({
@@ -110,8 +120,8 @@ def merge_ingredient_field(winner, field):
 
 
 def merge_ingredients(a, b):
-    a_product = not b or a and a.get('product') \
-        and len(a['product']) <= len(b['product'])
+    a_product = not b or not b.get('product') or \
+        a and a.get('product') and len(a['product']) <= len(b['product'])
     a_quantity = not b or a and a.get('quantity')
     a_units = not b or a and a.get('units')
 
