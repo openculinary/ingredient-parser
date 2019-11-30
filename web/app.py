@@ -23,7 +23,7 @@ def parse_descriptions_nyt(descriptions):
 def generate_subtexts(description):
     yield description
     if '/' in description:
-        pre_text, post_text = description.split('/')
+        pre_text, post_text = description.split('/', 1)
         post_tokens = post_text.split(' ')
         if pre_text:
             yield '{} {}'.format(pre_text, ' '.join(post_tokens[1:]))
@@ -120,8 +120,8 @@ def merge_ingredient_field(winner, field):
 
 
 def merge_ingredients(a, b):
-    a_product = not b or a and a.get('product') \
-        and len(a['product']) <= len(b['product'])
+    a_product = not b or not b.get('product') or \
+        a and a.get('product') and len(a['product']) <= len(b['product'])
     a_quantity = not b or a and a.get('quantity')
     a_units = not b or a and a.get('units')
 
