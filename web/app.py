@@ -26,7 +26,7 @@ def generate_subtexts(description):
         pre_text, post_text = description.split('/', 1)
         post_tokens = post_text.split(' ')
         if pre_text:
-            yield '{} {}'.format(pre_text, ' '.join(post_tokens[1:]))
+            yield u'{} {}'.format(pre_text, ' '.join(post_tokens[1:]))
         yield ' '.join(post_tokens)
 
 
