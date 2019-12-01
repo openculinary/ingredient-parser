@@ -83,6 +83,12 @@ def get_base_units(quantity):
 
 
 def parse_units(ingredient):
+    # Workaround: pint treats 'pinch' as 'pico-inch'
+    # https://github.com/hgrecco/pint/issues/273
+    if ingredient and ingredient.get('units') == 'pinch':
+        ingredient['units'] = 'ml'
+        ingredient['quantity'] = ingredient.get('quantity', 1) * 0.25
+
     try:
         quantity = unit_registry.Quantity(
             ingredient.get('quantity'),
@@ -95,8 +101,14 @@ def parse_units(ingredient):
     if base_units:
         quantity = quantity.to(base_units)
 
+    # TODO: This is ugly; we shouldn't be rounding/casting arbitrarily
+    if quantity.magnitude > 1:
+        result_quantity = int(quantity.magnitude)
+    else:
+        result_quantity = round(quantity.magnitude, 2)
+
     result = {
-        'quantity': int(quantity.magnitude),
+        'quantity': result_quantity,
         'quantity_parser': ingredient['parser'] + '+pint'
     }
     result.update({
