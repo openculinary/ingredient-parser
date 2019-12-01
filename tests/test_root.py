@@ -174,7 +174,7 @@ def test_parser_fallbacks(client):
             'product': 'potatoes',
             'product_parser': 'ingreedypy',
         },
-        'quantity': 453,
+        'quantity': 453.59,
         'quantity_parser': 'ingreedypy+pint',
         'units': 'g',
         'units_parser': 'ingreedypy+pint'
