@@ -101,6 +101,7 @@ def parse_units(ingredient):
     if base_units:
         quantity = quantity.to(base_units)
 
+    # TODO: This is ugly; we shouldn't be rounding/casting arbitrarily
     if quantity.magnitude > 1:
         result_quantity = int(quantity.magnitude)
     else:
