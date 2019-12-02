@@ -141,15 +141,13 @@ def merge_ingredients(a, b):
     a_quantity = (
         not contains(b, 'quantity') or contains(a, 'quantity')
         and a['quantity'] in re.findall('\\d+', description)
-    )
-    a_units = (
-        not contains(b, 'units') or contains(a, 'units')
+        and not b['quantity'] in re.findall('\\d+', description)
     )
 
     winners = {
         'product': a if a_product else b,
         'quantity': a if a_quantity else b,
-        'units': a if a_units else b,
+        'units': a if a_quantity else b,
     }
 
     ingredient = {'description': winners.values()[0]['description']}
@@ -158,9 +156,9 @@ def merge_ingredients(a, b):
         merge_field = merge_ingredient_field(winner, field)
         ingredient.update(merge_field)
 
-    units_field = parse_units(a if a_units else b)
+    units_field = parse_units(a if a_quantity else b)
     if not units_field:
-        units_field = parse_units(b if a_units else a)
+        units_field = parse_units(b if a_quantity else a)
     if units_field:
         ingredient.update(units_field)
 
