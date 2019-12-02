@@ -43,6 +43,29 @@ def test_parse_description_ingreedypy(description, expected):
     assert result == expected
 
 
+def test_merge_ingredient_quantity_heuristic(sample_ingredient):
+    ingredient_a = sample_ingredient.copy()
+    ingredient_a.update({
+        'description': '12 units of ingredient',
+        'parser': 'a',
+        'quantity': 1,
+        'units': 'a'
+    })
+
+    ingredient_b = sample_ingredient.copy()
+    ingredient_b.update({
+        'description': '12 units of ingredient',
+        'parser': 'b',
+        'quantity': 12,
+        'units': 'b'
+    })
+
+    merged_ingredient = merge_ingredients(ingredient_a, ingredient_b)
+
+    assert merged_ingredient['quantity'] == 12
+    assert merged_ingredient['units'] == 'b'
+
+
 def test_merge_ingredient_unit_fallback(sample_ingredient):
     ingredient_a = sample_ingredient.copy()
     ingredient_a.update({
