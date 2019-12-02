@@ -26,6 +26,11 @@ def parser_tests():
             'quantity': 1,
             'units': 'kilogram'
         },
+        '1kg/2lb 4oz potatoes, cut into 5cm/2in chunks': {
+            'product': 'potatoes, cut into 5cm/2in chunks',
+            'quantity': 1,
+            'units': 'kilogram'
+        },
     }
 
 

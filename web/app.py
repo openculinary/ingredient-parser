@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from fractions import Fraction
 import json
 from pint import UnitRegistry
+import re
 from unicodedata import numeric
 from subprocess import Popen, PIPE
 
@@ -125,11 +126,25 @@ def merge_ingredient_field(winner, field):
     return {field: ingredient} if field in nested_fields else ingredient
 
 
+def contains(item, field):
+    if not item:
+        return False
+    return item.get(field) is not None
+
+
 def merge_ingredients(a, b):
-    a_product = not b or not b.get('product') or \
-        a and a.get('product') and len(a['product']) <= len(b['product'])
-    a_quantity = not b or a and a.get('quantity')
-    a_units = not b or a and a.get('units')
+    description = (a or b).get('description')
+    a_product = (
+        not contains(b, 'product') or contains(a, 'product')
+        and len(a['product']) <= len(b['product'])
+    )
+    a_quantity = (
+        not contains(b, 'quantity') or contains(a, 'quantity')
+        and a['quantity'] in re.findall('\d+', description)
+    )
+    a_units = (
+        not contains(b, 'units') or contains(a, 'units')
+    )
 
     winners = {
         'product': a if a_product else b,
