@@ -140,7 +140,7 @@ def merge_ingredients(a, b):
     )
     a_quantity = (
         not contains(b, 'quantity') or contains(a, 'quantity')
-        and a['quantity'] in re.findall('\d+', description)
+        and a['quantity'] in re.findall('\\d+', description)
     )
     a_units = (
         not contains(b, 'units') or contains(a, 'units')
