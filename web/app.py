@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from fractions import Fraction
 import json
 from pint import UnitRegistry
+import re
 from unicodedata import numeric
 from subprocess import Popen, PIPE
 
@@ -87,7 +88,7 @@ def parse_units(ingredient):
     # https://github.com/hgrecco/pint/issues/273
     if ingredient and ingredient.get('units') == 'pinch':
         ingredient['units'] = 'ml'
-        ingredient['quantity'] = ingredient.get('quantity', 1) * 0.25
+        ingredient['quantity'] = (ingredient.get('quantity') or 1) * 0.25
 
     try:
         quantity = unit_registry.Quantity(
@@ -125,16 +126,28 @@ def merge_ingredient_field(winner, field):
     return {field: ingredient} if field in nested_fields else ingredient
 
 
+def contains(item, field):
+    if not item:
+        return False
+    return item.get(field) is not None
+
+
 def merge_ingredients(a, b):
-    a_product = not b or not b.get('product') or \
-        a and a.get('product') and len(a['product']) <= len(b['product'])
-    a_quantity = not b or a and a.get('quantity')
-    a_units = not b or a and a.get('units')
+    description = (a or b).get('description')
+    a_product = (
+        not contains(b, 'product') or contains(a, 'product')
+        and len(a['product']) <= len(b['product'])
+    )
+    a_quantity = (
+        not contains(b, 'quantity') or contains(a, 'quantity')
+        and a['quantity'] in re.findall('\\d+', description)
+        and not b['quantity'] in re.findall('\\d+', description)
+    )
 
     winners = {
         'product': a if a_product else b,
         'quantity': a if a_quantity else b,
-        'units': a if a_units else b,
+        'units': a if a_quantity else b,
     }
 
     ingredient = {'description': winners.values()[0]['description']}
@@ -143,9 +156,9 @@ def merge_ingredients(a, b):
         merge_field = merge_ingredient_field(winner, field)
         ingredient.update(merge_field)
 
-    units_field = parse_units(a if a_units else b)
+    units_field = parse_units(a if a_quantity else b)
     if not units_field:
-        units_field = parse_units(b if a_units else a)
+        units_field = parse_units(b if a_quantity else a)
     if units_field:
         ingredient.update(units_field)
 

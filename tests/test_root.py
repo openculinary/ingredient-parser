@@ -26,6 +26,11 @@ def parser_tests():
             'quantity': 1,
             'units': 'kilogram'
         },
+        '1kg/2lb 4oz potatoes, cut into 5cm/2in chunks': {
+            'product': 'potatoes, cut into 5cm/2in chunks',
+            'quantity': 1,
+            'units': 'kilogram'
+        },
     }
 
 
@@ -36,6 +41,29 @@ def test_parse_description_ingreedypy(description, expected):
     result = parse_description_ingreedypy(description)
 
     assert result == expected
+
+
+def test_merge_ingredient_quantity_heuristic(sample_ingredient):
+    ingredient_a = sample_ingredient.copy()
+    ingredient_a.update({
+        'description': '12 units of ingredient',
+        'parser': 'a',
+        'quantity': 1,
+        'units': 'a'
+    })
+
+    ingredient_b = sample_ingredient.copy()
+    ingredient_b.update({
+        'description': '12 units of ingredient',
+        'parser': 'b',
+        'quantity': 12,
+        'units': 'b'
+    })
+
+    merged_ingredient = merge_ingredients(ingredient_a, ingredient_b)
+
+    assert merged_ingredient['quantity'] == 12
+    assert merged_ingredient['units'] == 'b'
 
 
 def test_merge_ingredient_unit_fallback(sample_ingredient):
@@ -89,6 +117,8 @@ def test_request(client):
         'descriptions[]': [
             '100ml red wine',
             '1000 grams potatoes',
+            '2lb 4oz potatoes',
+            'pinch salt',
         ]
     })
 
@@ -111,6 +141,26 @@ def test_request(client):
         'units': 'g',
         'units_parser': 'ingreedypy+pint',
         'quantity': 1000,
+        'quantity_parser': 'ingreedypy+pint'
+    }, {
+        'description': '2lb 4oz potatoes',
+        'product': {
+            'product': 'potatoes',
+            'product_parser': 'ingreedypy',
+        },
+        'units': 'g',
+        'units_parser': 'ingreedypy+pint',
+        'quantity': 907.18,
+        'quantity_parser': 'ingreedypy+pint'
+    }, {
+        'description': 'pinch salt',
+        'product': {
+            'product': 'salt',
+            'product_parser': 'ingreedypy',
+        },
+        'units': 'ml',
+        'units_parser': 'ingreedypy+pint',
+        'quantity': 0.25,
         'quantity_parser': 'ingreedypy+pint'
     }]
 
