@@ -94,6 +94,7 @@ def test_request(client):
         'descriptions[]': [
             '100ml red wine',
             '1000 grams potatoes',
+            'pinch salt',
         ]
     })
 
@@ -116,6 +117,16 @@ def test_request(client):
         'units': 'g',
         'units_parser': 'ingreedypy+pint',
         'quantity': 1000,
+        'quantity_parser': 'ingreedypy+pint'
+    }, {
+        'description': 'pinch salt',
+        'product': {
+            'product': 'salt',
+            'product_parser': 'ingreedypy',
+        },
+        'units': 'ml',
+        'units_parser': 'ingreedypy+pint',
+        'quantity': 0.25,
         'quantity_parser': 'ingreedypy+pint'
     }]
 

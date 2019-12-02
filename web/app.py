@@ -88,7 +88,7 @@ def parse_units(ingredient):
     # https://github.com/hgrecco/pint/issues/273
     if ingredient and ingredient.get('units') == 'pinch':
         ingredient['units'] = 'ml'
-        ingredient['quantity'] = ingredient.get('quantity', 1) * 0.25
+        ingredient['quantity'] = (ingredient.get('quantity') or 1) * 0.25
 
     try:
         quantity = unit_registry.Quantity(
