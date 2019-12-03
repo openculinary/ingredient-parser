@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from mock import patch
 import pytest
 
@@ -30,6 +32,11 @@ def parser_tests():
             'product': 'potatoes, cut into 5cm/2in chunks',
             'quantity': 1,
             'units': 'kilogram'
+        },
+        '1-½ ounce, weight vanilla ice cream': {
+            'product': 'weight vanilla ice cream',
+            'quantity': 1.5,
+            'units': 'ounce'
         },
     }
 

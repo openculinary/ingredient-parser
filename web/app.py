@@ -29,6 +29,7 @@ def generate_subtexts(description):
         if pre_text:
             yield u'{} {}'.format(pre_text, u' '.join(post_tokens[1:]))
         yield u' '.join(post_tokens)
+    yield description.replace(',', '')
 
 
 def parse_description_ingreedypy(description):
@@ -37,8 +38,9 @@ def parse_description_ingreedypy(description):
     for text in generate_subtexts(description):
         try:
             ingredient = ingreedy.parse(text)
-        except Exception:
-            pass
+            break
+        except Exception as e:
+            print(e)
 
     return {
         'parser': 'ingreedypy',
