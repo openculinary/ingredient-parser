@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 flask = "==1.1.1"
-ingreedypy = { git = "https://github.com/openculinary/ingreedy-py.git", ref = "4a5f165" }
+ingreedypy = { git = "https://github.com/openculinary/ingreedy-py.git", ref = "f2573b4" }
 gunicorn = "==19.9.0"
 pint = "==0.9"
 
