@@ -152,7 +152,10 @@ def merge_ingredients(a, b):
         'units': a if a_quantity else b,
     }
 
-    ingredient = {'description': winners.values()[0]['description']}
+    ingredient = {
+        'description': description,
+        'parsers': {v['parser']: v for v in [a, b] if v}
+    }
     for field in ['product', 'quantity', 'units']:
         winner = winners[field]
         merge_field = merge_ingredient_field(winner, field)
