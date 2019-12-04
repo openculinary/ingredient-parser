@@ -92,6 +92,7 @@ def test_merge_ingredient_unit_fallback(sample_ingredient):
     })
 
     merged_ingredient = merge_ingredients(ingredient_a, ingredient_b)
+    del merged_ingredient['parsers']
 
     assert merged_ingredient == {
         'description': '1 block firm tofu',
