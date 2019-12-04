@@ -39,8 +39,8 @@ def parse_description_ingreedypy(description):
         try:
             ingredient = ingreedy.parse(text)
             break
-        except Exception as e:
-            print(e)
+        except Exception:
+            pass
 
     return {
         'parser': 'ingreedypy',
