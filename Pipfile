@@ -9,7 +9,7 @@ python_version = "2.7"
 [packages]
 flask = "==1.1.1"
 gunicorn = "==19.9.0"
-ingreedypy = { git = "https://github.com/openculinary/ingreedy-py.git", ref = "5135f7a" }
+ingreedypy = "==1.2"
 pint = "==0.9"
 
 [dev-packages]
