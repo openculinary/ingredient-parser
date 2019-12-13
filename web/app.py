@@ -1,24 +1,13 @@
 from flask import Flask, jsonify, request
 from fractions import Fraction
-import json
 from pint import UnitRegistry
-import re
 from unicodedata import numeric
-from subprocess import Popen, PIPE
 
 from ingreedypy import Ingreedy
 
 
 app = Flask(__name__)
 unit_registry = UnitRegistry()
-
-
-def parse_descriptions_nyt(descriptions):
-    env = {'PATH': '/usr/bin:/usr/local/bin', 'PYTHONPATH': '..'}
-    command = ['bin/parse-ingredients.py', '--model-file', 'model/latest']
-    parser = Popen(command, env=env, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    out, err = parser.communicate('\n'.join(descriptions))
-    return json.loads(out)
 
 
 def generate_subtexts(description):
@@ -32,7 +21,7 @@ def generate_subtexts(description):
     yield description.replace(',', '')
 
 
-def parse_description_ingreedypy(description):
+def parse_description(description):
     ingreedy = Ingreedy()
     ingredient = {}
     for text in generate_subtexts(description):
@@ -42,33 +31,21 @@ def parse_description_ingreedypy(description):
         except Exception:
             pass
 
-    return {
-        'parser': 'ingreedypy',
+    result = {
         'description': description,
-        'product': ingredient.get('ingredient'),
+        'product': {
+            'product': ingredient.get('ingredient'),
+            'product_parser': 'ingreedypy',
+        },
         'quantity': ingredient.get('amount'),
+        'quantity_parser': 'ingreedypy',
         'units': ingredient.get('unit'),
+        'units_parser': 'ingreedypy',
     }
-
-
-def parse_quantity(value):
-    if value is None:
-        return
-
-    try:
-        quantity = 0
-        fragments = value.split()
-        for fragment in fragments:
-            if len(fragment) == 1:
-                fragment = numeric(fragment)
-            elif fragment[-1].isdigit():
-                fragment = Fraction(fragment)
-            else:
-                fragment = Fraction(fragment[:-1]) + numeric(fragment[-1])
-            quantity += float(fragment)
-        return quantity
-    except Exception:
-        return None
+    units = parse_units(result)
+    if units:
+        result.update(units)
+    return result
 
 
 def get_base_units(quantity):
@@ -104,91 +81,24 @@ def parse_units(ingredient):
     if base_units:
         quantity = quantity.to(base_units)
 
-    result = {
-        'quantity': round(quantity.magnitude, 2),
-        'quantity_parser': ingredient['parser'] + '+pint'
-    }
-    result.update({
-        'units': base_units,
-        'units_parser': ingredient['parser'] + '+pint'
-    } if base_units else {})
+    result = {}
+    result['quantity'] = round(quantity.magnitude, 2)
+    if result.get('quantity_parser'):
+        result['quantity_parser'] += '+pint'
+    if base_units:
+        result['units'] = base_units
+        if result.get('units_parser'):
+            result['units_parser'] += '+pint'
     return result
-
-
-def merge_ingredient_field(winner, field):
-    if winner.get(field) is None:
-        return {}
-
-    nested_fields = {'product'}
-    parser = '{}_parser'.format(field)
-    ingredient = {
-        field: winner[field],
-        parser: winner['parser'] if winner[field] else None,
-    }
-    return {field: ingredient} if field in nested_fields else ingredient
-
-
-def contains(item, field):
-    if not item:
-        return False
-    return item.get(field) is not None
-
-
-def merge_ingredients(a, b):
-    description = (a or b).get('description')
-    a_product = (
-        not contains(b, 'product') or contains(a, 'product')
-        and len(a['product']) <= len(b['product'])
-    )
-    a_quantity = (
-        not contains(b, 'quantity') or contains(a, 'quantity')
-        and a['quantity'] in re.findall('\\d+', description)
-        and not b['quantity'] in re.findall('\\d+', description)
-    )
-
-    winners = {
-        'product': a if a_product else b,
-        'quantity': a if a_quantity else b,
-        'units': a if a_quantity else b,
-    }
-
-    ingredient = {
-        'description': description,
-        'parsers': {v['parser']: v for v in [a, b] if v}
-    }
-    for field in ['product', 'quantity', 'units']:
-        winner = winners[field]
-        merge_field = merge_ingredient_field(winner, field)
-        ingredient.update(merge_field)
-
-    units_field = parse_units(a if a_quantity else b)
-    if not units_field:
-        units_field = parse_units(b if a_quantity else a)
-    if units_field:
-        ingredient.update(units_field)
-
-    return ingredient
 
 
 @app.route('/', methods=['POST'])
 def root():
     descriptions = request.form.getlist('descriptions[]')
-    descriptions = [d.encode('utf-8') for d in descriptions]
     descriptions = [d.strip().lower() for d in descriptions]
 
-    nyt_ingredients = parse_descriptions_nyt(descriptions)
-    nyt_ingredients = [{
-        'parser': 'nyt',
-        'description': nyt_ingredient['input'],
-        'product': nyt_ingredient.get('name'),
-        'quantity': parse_quantity(nyt_ingredient.get('qty')),
-        'units': nyt_ingredient.get('unit'),
-    } for nyt_ingredient in nyt_ingredients]
-
     ingredients = []
-    for nyt_ingredient in nyt_ingredients:
-        description = nyt_ingredient['description']
-        igy_ingredient = parse_description_ingreedypy(description)
-        ingredient = merge_ingredients(nyt_ingredient, igy_ingredient)
+    for description in descriptions:
+        ingredient = parse_description(description)
         ingredients.append(ingredient)
     return jsonify(ingredients)

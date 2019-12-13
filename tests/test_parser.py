@@ -3,20 +3,9 @@
 import pytest
 
 from web.app import (
-    merge_ingredients,
-    parse_description_ingreedypy,
+    parse_description,
     parse_units,
 )
-
-
-@pytest.fixture
-def sample_ingredient():
-    return {
-        'description': '1 block firm tofu',
-        'product': 'tofu',
-        'units': 'block',
-        'quantity': 1
-    }
 
 
 def ingredient_parser_tests():
@@ -28,103 +17,42 @@ def ingredient_parser_tests():
         },
         '1 kilogram beef': {
             'product': 'beef',
-            'quantity': 1,
-            'units': 'kilogram'
+            'quantity': 1000,
+            'units': 'g'
         },
         '1kg/2lb 4oz potatoes, cut into 5cm/2in chunks': {
             'product': 'potatoes, cut into 5cm/2in chunks',
-            'quantity': 1,
-            'units': 'kilogram'
+            'quantity': 1000,
+            'units': 'g'
         },
         '1-½ ounce, weight vanilla ice cream': {
             'product': 'weight vanilla ice cream',
-            'quantity': 1.5,
-            'units': 'ounce'
+            'quantity': 42.52,
+            'units': 'g'
         },
     }.items()
 
 
 @pytest.mark.parametrize('description, expected', ingredient_parser_tests())
-def test_parse_description_ingreedypy(description, expected):
-    expected.update({'description': description, 'parser': 'ingreedypy'})
+def test_parse_description(description, expected):
+    expected.update({'description': description})
+    expected.update({'product': {'product': expected['product']}})
 
-    result = parse_description_ingreedypy(description)
+    result = parse_description(description)
+
+    # TODO: These are response-format workarounds and should be removed
+    result = {k: v for k, v in result.items() if not k.endswith('_parser')}
+    del result['product']['product_parser']
 
     assert result == expected
-
-
-def test_merge_ingredient_quantity_heuristic(sample_ingredient):
-    ingredient_a = sample_ingredient.copy()
-    ingredient_a.update({
-        'description': '12 units of ingredient',
-        'parser': 'a',
-        'quantity': 1,
-        'units': 'a'
-    })
-
-    ingredient_b = sample_ingredient.copy()
-    ingredient_b.update({
-        'description': '12 units of ingredient',
-        'parser': 'b',
-        'quantity': 12,
-        'units': 'b'
-    })
-
-    merged_ingredient = merge_ingredients(ingredient_a, ingredient_b)
-
-    assert merged_ingredient['quantity'] == 12
-    assert merged_ingredient['units'] == 'b'
-
-
-def test_merge_ingredient_unit_fallback(sample_ingredient):
-    ingredient_a = sample_ingredient.copy()
-    ingredient_a.update({
-        'parser': 'a',
-        'units': 'unparseable',
-        'quantity': 1
-    })
-
-    ingredient_b = sample_ingredient.copy()
-    ingredient_b.update({
-        'parser': 'b',
-        'units': 'g',
-        'quantity': 500
-    })
-
-    merged_ingredient = merge_ingredients(ingredient_a, ingredient_b)
-    del merged_ingredient['parsers']
-
-    assert merged_ingredient == {
-        'description': '1 block firm tofu',
-        'product': {
-            'product': 'tofu',
-            'product_parser': 'a'
-        },
-        'units': 'g',
-        'units_parser': 'b+pint',
-        'quantity': 500,
-        'quantity_parser': 'b+pint'
-    }
-
-
-def test_merge_ingredient_unit_fallback_missing(sample_ingredient):
-    ingredient_a = sample_ingredient.copy()
-    ingredient_a.update({'parser': 'a'})
-
-    for args in [(ingredient_a, None), (None, ingredient_a)]:
-        merged_ingredient = merge_ingredients(*args)
-
-        assert merged_ingredient is not None
-        assert merged_ingredient['units_parser'] == 'a'
 
 
 def unit_parser_tests():
     return {
         '0.25 ml': {
-            'parser': 'example',
-            'product': 'paprika',
+            'product': {'product': 'paprika'},
             'quantity': 1,
-            'units': 'pinch'
+            'units': 'pinch',
         },
     }.items()
 
