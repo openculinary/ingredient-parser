@@ -1,7 +1,5 @@
 from flask import Flask, jsonify, request
-from fractions import Fraction
 from pint import UnitRegistry
-from unicodedata import numeric
 
 from ingreedypy import Ingreedy
 
