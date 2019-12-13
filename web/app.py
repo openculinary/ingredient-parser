@@ -40,10 +40,29 @@ def parse_description(description):
         'units': ingredient.get('unit'),
         'units_parser': 'ingreedypy',
     }
+    ingredient = parse_ingredient(result)
+    if ingredient:
+        result.update(ingredient)
     units = parse_units(result)
     if units:
         result.update(units)
     return result
+
+
+def parse_ingredient(ingredient):
+    product = ingredient['product']['product']
+    parser = ingredient['product']['product_parser']
+
+    contents = []
+    parser += '+reciperadar'
+
+    return {
+        'product': {
+            'product': product,
+            'product_parser': parser,
+            'contents': contents,
+        }
+    }
 
 
 def get_base_units(quantity):
