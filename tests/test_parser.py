@@ -32,12 +32,13 @@ def ingredient_parser_tests():
 
 
 @pytest.mark.parametrize('description, expected', ingredient_parser_tests())
-def test_parse_description(description, expected):
+def test_parse_description(knowledge_graph_stub, description, expected):
     expected.update({'description': description})
     expected.update({'product': {'product': expected['product']}})
 
     result = parse_description(description)
     del result['product']['product_parser']
+    del result['product']['contents']
 
     for field in expected:
         assert result[field] == expected[field]

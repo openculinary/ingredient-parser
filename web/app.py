@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from pint import UnitRegistry
+import requests
 
 from ingreedypy import Ingreedy
 
@@ -53,8 +54,17 @@ def parse_ingredient(ingredient):
     product = ingredient['product']['product']
     parser = ingredient['product']['product_parser']
 
+    ingredient_data = requests.post(
+        url='http://knowledge-graph-service/ingredients/query',
+        data={'descriptions[]': [product]},
+        proxies={}
+    )
+
     contents = []
-    parser += '+reciperadar'
+    if ingredient_data.ok:
+        results = ingredient_data.json()['results']
+        product = results.get(product) or product
+        parser += '+reciperadar'
 
     return {
         'product': {
