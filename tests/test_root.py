@@ -27,13 +27,8 @@ def request_tests():
     }.items()
 
 
-def nyt_parser_stub(descriptions):
-    return [{'input': description} for description in descriptions]
-
-
 @pytest.mark.parametrize('description,expected', request_tests())
-@patch('web.app.parse_descriptions_nyt', nyt_parser_stub)
-def test_request(client, description, expected):
+def test_request(client, knowledge_graph_stub, description, expected):
     response = client.post('/', data={'descriptions[]': description})
     ingredient = response.json[0]
 
@@ -42,19 +37,16 @@ def test_request(client, description, expected):
     assert ingredient['units'] == expected['units']
 
 
-@patch('web.app.parse_descriptions_nyt', nyt_parser_stub)
-def test_request_dimensionless(client):
+def test_request_dimensionless(client, knowledge_graph_stub):
     response = client.post('/', data={'descriptions[]': ['1 potato']})
     ingredient = response.json[0]
 
     assert ingredient['product']['product'] == 'potato'
     assert ingredient['quantity'] == 1
-    assert 'units' not in ingredient
 
 
 @patch('web.app.parse_units')
-@patch('web.app.parse_descriptions_nyt', nyt_parser_stub)
-def test_request_unit_parse_failure(parse_units, client):
+def test_request_unit_parse_failure(parse_units, client, knowledge_graph_stub):
     parse_units.return_value = None
 
     response = client.post('/', data={'descriptions[]': ['100ml red wine']})

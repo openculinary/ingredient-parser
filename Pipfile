@@ -4,15 +4,17 @@ verify_ssl = true
 name = "pypi"
 
 [requires]
-python_version = "2.7"
+python_version = "3.7"
 
 [packages]
 flask = "==1.1.1"
 gunicorn = "==19.9.0"
 ingreedypy = "==1.2"
 pint = "==0.9"
+requests = "==2.22.0"
 
 [dev-packages]
 flake8 = "*"
 mock = "*"
-pytest = "==4.6.5"
+pytest = "*"
+responses = "*"
