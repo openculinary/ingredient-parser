@@ -39,12 +39,10 @@ def test_parse_description(description, expected):
     expected.update({'product': {'product': expected['product']}})
 
     result = parse_description(description)
-
-    # TODO: These are response-format workarounds and should be removed
-    result = {k: v for k, v in result.items() if not k.endswith('_parser')}
     del result['product']['product_parser']
 
-    assert result == expected
+    for field in expected:
+        assert result[field] == expected[field]
 
 
 def unit_parser_tests():
