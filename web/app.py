@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from pint import UnitRegistry
+import requests
 
 from ingreedypy import Ingreedy
 
@@ -20,19 +21,19 @@ def generate_subtexts(description):
 
 
 def parse_description(description):
-    ingreedy = Ingreedy()
     ingredient = {}
     for text in generate_subtexts(description):
         try:
-            ingredient = ingreedy.parse(text)
+            ingredient = Ingreedy().parse(text)
             break
         except Exception:
-            pass
+            continue
 
     result = {
         'description': description,
         'product': {
             'product': ingredient.get('ingredient'),
+            'contents': [],
             'product_parser': 'ingreedypy',
         },
         'quantity': ingredient.get('amount'),
@@ -44,6 +45,28 @@ def parse_description(description):
     if units:
         result.update(units)
     return result
+
+
+def parse_descriptions(descriptions):
+    ingredients_by_product = {}
+    for description in descriptions:
+        ingredient = parse_description(description)
+        product = ingredient['product']['product']
+        ingredients_by_product[product] = ingredient
+
+    ingredient_data = requests.post(
+        url='http://knowledge-graph-service/ingredients/query',
+        data={'descriptions[]': list(ingredients_by_product.keys())},
+        proxies={}
+    )
+    if ingredient_data.ok:
+        results = ingredient_data.json()['results']
+        for product in results:
+            ingredient = ingredients_by_product[product]
+            ingredient['product']['product'] = results.get(product)
+            ingredient['product']['product_parser'] += '+graph'
+
+    return list(ingredients_by_product.values())
 
 
 def get_base_units(quantity):
@@ -95,8 +118,6 @@ def root():
     descriptions = request.form.getlist('descriptions[]')
     descriptions = [d.strip().lower() for d in descriptions]
 
-    ingredients = []
-    for description in descriptions:
-        ingredient = parse_description(description)
-        ingredients.append(ingredient)
+    ingredients = parse_descriptions(descriptions)
+
     return jsonify(ingredients)

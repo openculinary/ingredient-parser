@@ -28,7 +28,7 @@ def request_tests():
 
 
 @pytest.mark.parametrize('description,expected', request_tests())
-def test_request(client, description, expected):
+def test_request(client, knowledge_graph_stub, description, expected):
     response = client.post('/', data={'descriptions[]': description})
     ingredient = response.json[0]
 
@@ -37,7 +37,7 @@ def test_request(client, description, expected):
     assert ingredient['units'] == expected['units']
 
 
-def test_request_dimensionless(client):
+def test_request_dimensionless(client, knowledge_graph_stub):
     response = client.post('/', data={'descriptions[]': ['1 potato']})
     ingredient = response.json[0]
 
@@ -46,7 +46,7 @@ def test_request_dimensionless(client):
 
 
 @patch('web.app.parse_units')
-def test_request_unit_parse_failure(parse_units, client):
+def test_request_unit_parse_failure(parse_units, client, knowledge_graph_stub):
     parse_units.return_value = None
 
     response = client.post('/', data={'descriptions[]': ['100ml red wine']})

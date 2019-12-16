@@ -1,7 +1,11 @@
 import pytest
+import responses
+
+import json
 
 from web.app import (
     parse_description,
+    parse_descriptions,
     parse_units,
 )
 
@@ -38,9 +42,33 @@ def test_parse_description(description, expected):
 
     result = parse_description(description)
     del result['product']['product_parser']
+    del result['product']['contents']
 
     for field in expected:
         assert result[field] == expected[field]
+
+
+@responses.activate
+def test_knowledge_graph_query():
+    descriptions_to_products = {
+        'whole onion, diced': 'onion',
+        'splash of tomato ketchup': 'tomato ketchup',
+    }
+
+    response = {'results': {d: p for d, p in descriptions_to_products.items()}}
+    responses.add(
+        responses.POST,
+        'http://knowledge-graph-service/ingredients/query',
+        body=json.dumps(response),
+    )
+
+    results = parse_descriptions(list(descriptions_to_products.keys()))
+    for result in results:
+        description = result['description']
+        expected_product = descriptions_to_products.get(description)
+
+        assert result['product']['product'] == expected_product
+        assert 'graph' in result['product']['product_parser']
 
 
 def unit_parser_tests():

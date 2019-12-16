@@ -11,8 +11,10 @@ flask = "==1.1.1"
 gunicorn = "==19.9.0"
 ingreedypy = "==1.2"
 pint = "==0.9"
+requests = "==2.22.0"
 
 [dev-packages]
 flake8 = "*"
 mock = "*"
 pytest = "*"
+responses = "*"
