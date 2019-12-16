@@ -32,7 +32,7 @@ def ingredient_parser_tests():
 
 
 @pytest.mark.parametrize('description, expected', ingredient_parser_tests())
-def test_parse_description(knowledge_graph_stub, description, expected):
+def test_parse_description(description, expected):
     expected.update({'description': description})
     expected.update({'product': {'product': expected['product']}})
 
