@@ -15,4 +15,4 @@ pint = "==0.9"
 [dev-packages]
 flake8 = "*"
 mock = "*"
-pytest = "==4.6.5"
+pytest = "*"
