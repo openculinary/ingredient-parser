@@ -64,7 +64,7 @@ def parse_descriptions(descriptions):
         for product in results:
             ingredient = ingredients_by_product[product]
             ingredient['product']['product'] = results.get(product)
-            ingredient['product']['product_parser'] += 'graph'
+            ingredient['product']['product_parser'] += '+graph'
 
     return list(ingredients_by_product.values())
 
