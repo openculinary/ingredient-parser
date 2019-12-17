@@ -6,8 +6,6 @@ For example, given the ingredient text: `50ml of water`, the `ingredient-parser`
 
 This functionality is provided to the [crawler](https://www.github.com/openculinary/crawler) service so that it can extract additional data from each recipe crawled.
 
-This service is dependent on the image built by the [ingredient-phrase-tagger-wrapper](https://www.github.com/openculinary/ingredient-phrase-tagger-wrapper) repository, and also dependent on the [ingreedypy](https://pypi.org/project/ingreedypy) library; both of these provide ingredient text parsing functionality.
-
 ## Install dependencies
 
 Make sure to follow the RecipeRadar [infrastructure](https://www.github.com/openculinary/infrastructure) setup to ensure all cluster dependencies are available in your environment.
