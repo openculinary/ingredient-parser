@@ -48,27 +48,27 @@ def parse_description(description):
 
 
 def parse_descriptions(descriptions):
-    ingredients_by_description = {}
+    ingredients_by_product = {}
     for description in descriptions:
         ingredient = parse_description(description)
         product = ingredient['product']['product']
-        ingredients_by_description[product] = ingredient
+        ingredients_by_product[product] = ingredient
 
     ingredient_data = requests.post(
         url='http://knowledge-graph-service/ingredients/query',
-        data={'descriptions[]': list(ingredients_by_description.keys())},
+        data={'descriptions[]': list(ingredients_by_product.keys())},
         proxies={}
     )
     if ingredient_data.ok:
         results = ingredient_data.json()['results']
-        for description in results:
-            if results[description] is None:
+        for product in results:
+            if results[product] is None:
                 continue
-            ingredient = ingredients_by_description[description]
-            ingredient['product']['product'] = results.get(description)
+            ingredient = ingredients_by_product[product]
+            ingredient['product']['product'] = results[product]
             ingredient['product']['product_parser'] += '+graph'
 
-    return list(ingredients_by_description.values())
+    return list(ingredients_by_product.values())
 
 
 def get_base_units(quantity):
