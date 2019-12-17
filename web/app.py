@@ -62,8 +62,10 @@ def parse_descriptions(descriptions):
     if ingredient_data.ok:
         results = ingredient_data.json()['results']
         for product in results:
+            if results[product] is None:
+                continue
             ingredient = ingredients_by_product[product]
-            ingredient['product']['product'] = results.get(product)
+            ingredient['product']['product'] = results[product]
             ingredient['product']['product_parser'] += '+graph'
 
     return list(ingredients_by_product.values())
