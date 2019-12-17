@@ -53,6 +53,7 @@ def test_knowledge_graph_query():
     descriptions_to_products = {
         'whole onion, diced': 'onion',
         'splash of tomato ketchup': 'tomato ketchup',
+        'plantains, peeled and chopped': None,
     }
 
     response = {'results': {d: p for d, p in descriptions_to_products.items()}}
@@ -65,10 +66,14 @@ def test_knowledge_graph_query():
     results = parse_descriptions(list(descriptions_to_products.keys()))
     for result in results:
         description = result['description']
-        expected_product = descriptions_to_products.get(description)
+        fixture_product = descriptions_to_products.get(description)
 
-        assert result['product']['product'] == expected_product
-        assert 'graph' in result['product']['product_parser']
+        if fixture_product is None:
+            assert result['product']['product'] == description
+            assert 'graph' not in result['product']['product_parser']
+        else:
+            assert result['product']['product'] == fixture_product
+            assert 'graph' in result['product']['product_parser']
 
 
 def unit_parser_tests():
