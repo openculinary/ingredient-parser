@@ -33,7 +33,6 @@ def parse_description(description):
         'description': description,
         'product': {
             'product': ingredient.get('ingredient'),
-            'contents': [],
             'product_parser': 'ingreedypy',
         },
         'quantity': ingredient.get('amount'),
@@ -65,8 +64,8 @@ def parse_descriptions(descriptions):
             if results[product] is None:
                 continue
             ingredient = ingredients_by_product[product]
-            ingredient['product']['product'] = results[product]
-            ingredient['product']['product_parser'] += '+graph'
+            ingredient['product'] = results[product]
+            ingredient['product_parser'] = 'knowledge-graph'
 
     return list(ingredients_by_product.values())
 
