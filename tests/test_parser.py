@@ -42,7 +42,6 @@ def test_parse_description(description, expected):
 
     result = parse_description(description)
     del result['product']['product_parser']
-    del result['product']['contents']
 
     for field in expected:
         assert result[field] == expected[field]
@@ -56,7 +55,12 @@ def test_knowledge_graph_query():
         'plantains, peeled and chopped': None,
     }
 
-    response = {'results': {d: p for d, p in descriptions_to_products.items()}}
+    response = {
+        'results': {
+            d: {'product': p} if p else None
+            for d, p in descriptions_to_products.items()
+        }
+    }
     responses.add(
         responses.POST,
         'http://knowledge-graph-service/ingredients/query',

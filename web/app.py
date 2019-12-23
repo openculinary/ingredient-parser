@@ -65,7 +65,7 @@ def parse_descriptions(descriptions):
                 continue
             ingredient = ingredients_by_product[product]
             ingredient['product'] = results[product]
-            ingredient['product_parser'] = 'knowledge-graph'
+            ingredient['product']['product_parser'] = 'knowledge-graph'
 
     return list(ingredients_by_product.values())
 
