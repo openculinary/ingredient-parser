@@ -29,12 +29,15 @@ def parse_description(description):
         except Exception:
             continue
 
+    parsed_product = ingredient.get('ingredient')
+    product = {
+        'product': parsed_product or description,
+        'product_parser': 'ingreedypy' if parsed_product else None,
+    }
+
     result = {
         'description': description,
-        'product': {
-            'product': ingredient.get('ingredient'),
-            'product_parser': 'ingreedypy',
-        },
+        'product': product,
         'quantity': ingredient.get('amount'),
         'quantity_parser': 'ingreedypy',
         'units': ingredient.get('unit'),
