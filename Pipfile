@@ -9,7 +9,7 @@ python_version = "3.7"
 [packages]
 flask = "==1.1.1"
 gunicorn = "==20.0.4"
-ingreedypy = "==1.2.2"
+ingreedypy = "==1.2.3"
 pint = "==0.9"
 requests = "==2.22.0"
 
