@@ -9,6 +9,7 @@ python_version = "3.7"
 [packages]
 flask = "==1.1.1"
 gunicorn = "==20.0.4"
+ingreedypy = { git="https://github.com/openculinary/ingreedy-py.git", ref="support-multipart-quantities" }
 pint = "==0.9"
 requests = "==2.22.0"
 
@@ -17,8 +18,3 @@ flake8 = "*"
 mock = "*"
 pytest = "*"
 responses = "*"
-
-[packages.ingreedypy]
-git = "https://github.com/openculinary/ingreedy-py.git"
-editable = true
-ref = "support-multipart-quantities"
