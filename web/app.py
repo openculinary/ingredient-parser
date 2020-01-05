@@ -20,6 +20,43 @@ def generate_subtexts(description):
     yield description.replace(',', '')
 
 
+def parse_quantity(quantity):
+    # Workaround: pint treats 'pinch' as 'pico-inch'
+    # https://github.com/hgrecco/pint/issues/273
+    if quantity['unit'] == 'pinch':
+        quantity['unit'] = 'ml'
+        quantity['amount'] = (quantity.get('amount') or 1) * 0.25
+
+    try:
+        quantity = unit_registry.Quantity(
+            quantity['amount'],
+            quantity['unit']
+        )
+    except Exception:
+        return
+
+    base_units = get_base_units(quantity)
+    if base_units:
+        quantity = quantity.to(base_units)
+    return quantity
+
+
+def parse_quantities(ingredient):
+    magnitude, units, parser = 0, None, 'ingreedypy'
+
+    total = 0
+    for quantity in ingredient.get('quantity') or []:
+        total += parse_quantity(quantity) or 0
+
+    if total:
+        magnitude = round(total.magnitude, 2)
+        parser = f'{parser}+pint'
+        if not total.dimensionless:
+            units = unit_registry.get_symbol(str(total.units))
+
+    return magnitude or None, units, parser
+
+
 def parse_description(description):
     ingredient = {}
     for text in generate_subtexts(description):
@@ -35,18 +72,15 @@ def parse_description(description):
         'product_parser': 'ingreedypy' if parsed_product else None,
     }
 
-    result = {
+    quantity, units, parser = parse_quantities(ingredient)
+    return {
         'description': description,
         'product': product,
-        'quantity': ingredient.get('amount'),
-        'quantity_parser': 'ingreedypy',
-        'units': ingredient.get('unit'),
-        'units_parser': 'ingreedypy',
+        'quantity': quantity,
+        'quantity_parser': parser,
+        'units': units,
+        'units_parser': parser,
     }
-    units = parse_units(result)
-    if units:
-        result.update(units)
-    return result
 
 
 def parse_descriptions(descriptions):
@@ -85,36 +119,6 @@ def get_base_units(quantity):
         for k, v in dimensionalities.items()
     }
     return dimensionalities.get(quantity.dimensionality)
-
-
-def parse_units(ingredient):
-    # Workaround: pint treats 'pinch' as 'pico-inch'
-    # https://github.com/hgrecco/pint/issues/273
-    if ingredient and ingredient.get('units') == 'pinch':
-        ingredient['units'] = 'ml'
-        ingredient['quantity'] = (ingredient.get('quantity') or 1) * 0.25
-
-    try:
-        quantity = unit_registry.Quantity(
-            ingredient.get('quantity'),
-            ingredient.get('units')
-        )
-    except Exception:
-        return
-
-    base_units = get_base_units(quantity)
-    if base_units:
-        quantity = quantity.to(base_units)
-
-    result = {}
-    result['quantity'] = round(quantity.magnitude, 2)
-    if result.get('quantity_parser'):
-        result['quantity_parser'] += '+pint'
-    if base_units:
-        result['units'] = base_units
-        if result.get('units_parser'):
-            result['units_parser'] += '+pint'
-    return result
 
 
 @app.route('/', methods=['POST'])

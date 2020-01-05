@@ -16,7 +16,7 @@ def request_tests():
         },
         '2lb 4oz potatoes': {
             'product': 'potatoes',
-            'quantity': 907.18,
+            'quantity': 1020.58,
             'units': 'g',
         },
         'pinch salt': {
@@ -45,9 +45,9 @@ def test_request_dimensionless(client, knowledge_graph_stub):
     assert ingredient['quantity'] == 1
 
 
-@patch('web.app.parse_units')
-def test_request_unit_parse_failure(parse_units, client, knowledge_graph_stub):
-    parse_units.return_value = None
+@patch('web.app.parse_quantity')
+def test_parse_quantity_failure(parse_quantity, client, knowledge_graph_stub):
+    parse_quantity.return_value = None
 
     response = client.post('/', data={'descriptions[]': ['100ml red wine']})
     ingredient = response.json[0]

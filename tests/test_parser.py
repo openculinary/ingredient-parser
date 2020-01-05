@@ -6,7 +6,7 @@ import json
 from web.app import (
     parse_description,
     parse_descriptions,
-    parse_units,
+    parse_quantities,
 )
 
 
@@ -83,16 +83,15 @@ def test_knowledge_graph_query():
 def unit_parser_tests():
     return {
         '0.25 ml': {
+            'quantity': [{'amount': 1, 'unit': 'pinch'}],
             'product': {'product': 'paprika'},
-            'quantity': 1,
-            'units': 'pinch',
         },
     }.items()
 
 
 @pytest.mark.parametrize('expected, ingredient', unit_parser_tests())
-def test_parse_units(expected, ingredient):
-    result = parse_units(ingredient)
-    result = '{} {}'.format(result['quantity'], result['units'])
+def test_parse_quantity(expected, ingredient):
+    quantity, units, parser = parse_quantities(ingredient)
+    result = '{} {}'.format(quantity, units)
 
     assert result == expected
