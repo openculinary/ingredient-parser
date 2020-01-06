@@ -86,7 +86,10 @@ def parse_description(description):
 def parse_descriptions(descriptions):
     ingredients_by_product = {}
     for description in descriptions:
-        ingredient = parse_description(description)
+        try:
+            ingredient = parse_description(description)
+        except Exception as e:
+            raise Exception(f'Parsing failed: "{description}" - {e}')
         product = ingredient['product']['product']
         ingredients_by_product[product] = ingredient
 
