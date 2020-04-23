@@ -49,16 +49,22 @@ def test_parse_description(description, expected):
 
 @responses.activate
 def test_knowledge_graph_query():
-    descriptions_to_products = {
-        'whole onion, diced': 'onion',
-        'splash of tomato ketchup': 'tomato ketchup',
+    description_responses = {
+        'whole onion, diced': {
+            'product': 'onion',
+            'markup': 'whole <mark>onion</mark> diced',
+        },
+        'splash of tomato ketchup': {
+            'product': 'tomato ketchup',
+            'markup': 'splash of <mark>tomato ketchup</mark>',
+        },
         'plantains, peeled and chopped': None,
     }
 
     response = {
         'results': {
-            d: {'product': p} if p else None
-            for d, p in descriptions_to_products.items()
+            d: r if r else None
+            for d, r in description_responses.items()
         }
     }
     responses.add(
@@ -67,16 +73,16 @@ def test_knowledge_graph_query():
         body=json.dumps(response),
     )
 
-    results = parse_descriptions(list(descriptions_to_products.keys()))
+    results = parse_descriptions(list(description_responses.keys()))
     for result in results:
         description = result['description']
-        fixture_product = descriptions_to_products.get(description)
+        response = description_responses.get(description)
 
-        if fixture_product is None:
+        if not response:
             assert result['product']['product'] == description
             assert 'graph' not in result['product']['product_parser']
         else:
-            assert result['product']['product'] == fixture_product
+            assert result['product']['product'] == response['product']
             assert 'graph' in result['product']['product_parser']
 
 
