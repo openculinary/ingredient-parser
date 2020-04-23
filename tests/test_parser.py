@@ -83,7 +83,7 @@ def test_knowledge_graph_query():
             assert 'graph' not in result['product']['product_parser']
             assert result['markup'] == description
         else:
-            assert result['product']['product'] == response['product']
+            assert result['product']['product'] == response['product']['product']
             assert 'graph' in result['product']['product_parser']
             assert result['markup'] == response['query']['markup']
 
