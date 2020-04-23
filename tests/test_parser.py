@@ -79,7 +79,7 @@ def test_knowledge_graph_query():
     results = parse_descriptions(list(description_responses.keys()))
     for result in results:
         description = result['description']
-        markup = result['markup']
+        markup = result['markup'].replace('ingredient>', 'mark>')
         product = result['product']
         response = description_responses.get(description)
 
