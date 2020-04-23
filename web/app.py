@@ -4,6 +4,8 @@ import requests
 
 from ingreedypy import Ingreedy
 
+from web.recipeml import merge
+
 
 app = Flask(__name__)
 unit_registry = UnitRegistry()
@@ -112,6 +114,12 @@ def parse_descriptions(descriptions):
             ingredient['product'] = results[product]['product']
             ingredient['product']['product_parser'] = 'knowledge-graph'
 
+    for product, ingredient in ingredients_by_product.items():
+        ingredients_by_product[product]['markup'] = merge(
+            ingredient_markup=ingredient['markup'],
+            quantity=ingredient['quantity'],
+            units=ingredient['units'],
+        )
     return list(ingredients_by_product.values())
 
 
