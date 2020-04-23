@@ -76,16 +76,18 @@ def test_knowledge_graph_query():
     results = parse_descriptions(list(description_responses.keys()))
     for result in results:
         description = result['description']
+        markup = result['markup']
+        product = result['product']
         response = description_responses.get(description)
 
         if not response:
-            assert result['product']['product'] == description
+            assert markup == description
+            assert product['product'] == description
             assert 'graph' not in result['product']['product_parser']
-            assert result['markup'] == description
         else:
-            assert result['product']['product'] == response['product']['product']
-            assert 'graph' in result['product']['product_parser']
-            assert result['markup'] == response['query']['markup']
+            assert markup == response['query']['markup']
+            assert product['product'] == response['product']['product']
+            assert 'graph' in product['product_parser']
 
 
 def unit_parser_tests():
