@@ -58,25 +58,28 @@ def parse_quantities(ingredient):
 
 
 def parse_description(description):
-    ingredient = {}
+    product = description
+    quantity = None
+    units = None
+    parser = None
+
     for text in generate_subtexts(description):
         try:
             ingredient = Ingreedy().parse(text)
+            product = ingredient['ingredient']
+            product_parser = 'ingreedypy'
+            quantity, units, parser = parse_quantities(ingredient)
             break
         except Exception:
             continue
 
-    parsed_product = ingredient.get('ingredient')
-    product = {
-        'product': parsed_product or description,
-        'product_parser': 'ingreedypy' if parsed_product else None,
-    }
-
-    quantity, units, parser = parse_quantities(ingredient)
     return {
         'description': description,
-        'product': product,
-        'markup': parsed_product or description,
+        'product': {
+            'product': product,
+            'product_parser': product_parser,
+        },
+        'markup': f'<mark>{product}</mark>',
         'quantity': quantity,
         'quantity_parser': parser,
         'units': units,

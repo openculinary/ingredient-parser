@@ -58,7 +58,10 @@ def test_knowledge_graph_query():
             'product': {'product': 'tomato ketchup'},
             'query': {'markup': 'splash of <mark>tomato ketchup</mark>'},
         },
-        'plantains, peeled and chopped': None,
+        'plantains, peeled and chopped': {
+            'product': {'product': 'plantains, peeled and chopped'},
+            'query': {'markup': '<mark>plantains, peeled and chopped</mark>'},
+        },
     }
 
     response = {
