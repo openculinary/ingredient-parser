@@ -58,7 +58,10 @@ def test_knowledge_graph_query():
             'product': {'product': 'tomato ketchup'},
             'query': {'markup': 'splash of <mark>tomato ketchup</mark>'},
         },
-        'plantains, peeled and chopped': None,
+        'plantains, peeled and chopped': {
+            'product': {'product': 'plantains, peeled and chopped'},
+            'query': {'markup': '<mark>plantains, peeled and chopped</mark>'},
+        },
     }
 
     response = {
@@ -76,7 +79,7 @@ def test_knowledge_graph_query():
     results = parse_descriptions(list(description_responses.keys()))
     for result in results:
         description = result['description']
-        markup = result['markup']
+        markup = result['markup'].replace('ingredient>', 'mark>')
         product = result['product']
         response = description_responses.get(description)
 
