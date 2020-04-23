@@ -105,9 +105,9 @@ def parse_descriptions(descriptions):
             if results[product] is None:
                 continue
             ingredient = ingredients_by_product[product]
+            ingredient['markup'] = results[product]['query']['markup']
             ingredient['product'] = results[product]['product']
             ingredient['product']['product_parser'] = 'knowledge-graph'
-            ingredient['markup'] = results[product]['query']['markup']
 
     return list(ingredients_by_product.values())
 
