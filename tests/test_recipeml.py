@@ -11,8 +11,7 @@ def recipeml_tests():
         },
         'potatoes au gratin': {
             'markup': '<mark>potatoes</mark> au gratin',
-            'units': 'g',
-            'quantity': 500,
+            'quantity': 5,
         },
         'firm tofu': {
             'markup': '<mark>firm tofu</mark>',
@@ -21,8 +20,7 @@ def recipeml_tests():
         },
         'pinch salt': {
             'markup': 'pinch of <mark>salt</mark>',
-            'units': 'ml',
-            'quantity': 0.25,
+            'units': 'pinch',
         },
     }.items()
 
@@ -30,10 +28,13 @@ def recipeml_tests():
 def expected_markup(ingredient):
     markup, quantity, units = (
         ingredient['markup'],
-        ingredient['quantity'],
-        ingredient['units'],
+        ingredient.get('quantity'),
+        ingredient.get('units'),
     )
-    amount_markup = f'<amt><qty>{quantity}</qty><unit>{units}</unit></amt>'
+    amount_markup = f'<amt>'
+    amount_markup += f'<qty>{quantity}</qty>' if quantity else ''
+    amount_markup += f'<unit>{units}</unit>' if units else ''
+    amount_markup += f'</amt>'
     ingredient_markup = markup.replace('mark>', 'ingredient>')
     return amount_markup + ingredient_markup
 
@@ -43,7 +44,7 @@ def test_request(_, ingredient):
     expected = expected_markup(ingredient)
     result = merge(
         ingredient_markup=ingredient['markup'],
-        quantity=ingredient['quantity'],
-        units=ingredient['units']
+        quantity=ingredient.get('quantity'),
+        units=ingredient.get('units')
     )
     assert result == expected
