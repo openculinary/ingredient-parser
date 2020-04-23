@@ -76,6 +76,7 @@ def parse_description(description):
     return {
         'description': description,
         'product': product,
+        'markup': parsed_product or description,
         'quantity': quantity,
         'quantity_parser': parser,
         'units': units,
@@ -106,6 +107,7 @@ def parse_descriptions(descriptions):
             ingredient = ingredients_by_product[product]
             ingredient['product'] = results[product]
             ingredient['product']['product_parser'] = 'knowledge-graph'
+            ingredient['markup'] = ingredient['product'].pop('markup')
 
     return list(ingredients_by_product.values())
 

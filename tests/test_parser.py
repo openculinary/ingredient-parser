@@ -81,9 +81,11 @@ def test_knowledge_graph_query():
         if not response:
             assert result['product']['product'] == description
             assert 'graph' not in result['product']['product_parser']
+            assert result['markup'] == description
         else:
             assert result['product']['product'] == response['product']
             assert 'graph' in result['product']['product_parser']
+            assert result['markup'] == response['markup']
 
 
 def unit_parser_tests():
