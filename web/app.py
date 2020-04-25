@@ -61,6 +61,7 @@ def parse_quantities(ingredient):
 
 def parse_description(description):
     product = description
+    product_parser = None
     quantity = None
     units = None
     parser = None
