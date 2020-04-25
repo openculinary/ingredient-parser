@@ -65,6 +65,10 @@ def test_knowledge_graph_query():
             'product': {'product': 'plantains, peeled and chopped'},
             'query': {'markup': '<mark>plantains, peeled and chopped</mark>'},
         },
+        'unknown': {
+            'product': None,
+            'query': {'markup': 'unknown'},
+        },
     }
 
     response = {
@@ -86,8 +90,8 @@ def test_knowledge_graph_query():
         product = result['product']
         response = description_responses.get(description)
 
-        if not response:
-            assert markup == description
+        if not response['product']:
+            assert markup == f'<mark>{description}</mark>'
             assert product['product'] == description
             assert 'graph' not in result['product']['product_parser']
         else:

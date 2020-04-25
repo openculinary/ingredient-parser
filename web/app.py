@@ -109,7 +109,7 @@ def parse_descriptions(descriptions):
     if ingredient_data.ok:
         results = ingredient_data.json()['results']
         for product in results:
-            if results[product] is None:
+            if results[product]['product'] is None:
                 continue
             ingredient = ingredients_by_product[product]
             ingredient['markup'] = results[product]['query']['markup']
