@@ -1,5 +1,5 @@
-from mock import patch
 import pytest
+from unittest.mock import patch
 
 
 def request_tests():
