@@ -5,7 +5,7 @@ SERVICE=$(basename `git rev-parse --show-toplevel`)
 IMAGE_NAME=${REGISTRY}/${PROJECT}/${SERVICE}
 IMAGE_COMMIT=$(git rev-parse --short HEAD)
 
-container=$(buildah from docker.io/library/python:3.7-alpine)
+container=$(buildah from docker.io/library/python:3.8-alpine)
 buildah copy ${container} 'web' 'web'
 buildah copy ${container} 'Pipfile'
 buildah run ${container} -- pip install pipenv --
