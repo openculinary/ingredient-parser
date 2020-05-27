@@ -31,10 +31,10 @@ def expected_markup(ingredient):
         ingredient.get('quantity'),
         ingredient.get('units'),
     )
-    amount_markup = f'<amt>'
+    amount_markup = '<amt>'
     amount_markup += f'<qty>{quantity}</qty>' if quantity else ''
     amount_markup += f'<unit>{units}</unit>' if units else ''
-    amount_markup += f'</amt>'
+    amount_markup += '</amt>'
     ingredient_markup = markup.replace('mark>', 'ingredient>')
     return amount_markup + ingredient_markup
 
