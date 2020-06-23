@@ -48,3 +48,13 @@ def test_request(_, ingredient):
         units=ingredient.get('units')
     )
     assert result == expected
+
+
+def test_entity_escaping():
+    markup = '&amp; <mark>example</mark>'
+    quantity = 1
+
+    expected = '<amt><qty>1</qty></amt>&amp; <ingredient>example</ingredient>'
+    result = merge(markup, quantity, None)
+
+    assert result == expected

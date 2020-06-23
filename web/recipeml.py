@@ -1,8 +1,9 @@
 import xml.etree.ElementTree as ET
+from xml.sax.saxutils import escape
 
 
 def inner_xml(element):
-    return (element.text or '') + ''.join([
+    return escape(element.text or '') + ''.join([
         ET.tostring(subelement, 'unicode')
         for subelement in element
     ])
