@@ -147,7 +147,7 @@ def get_base_units(quantity):
 @app.route('/', methods=['POST'])
 def root():
     descriptions = request.form.getlist('descriptions[]')
-    descriptions = [d.strip().lower() for d in descriptions]
+    descriptions = [d.strip() for d in descriptions]
 
     ingredients = parse_descriptions(descriptions)
 
