@@ -62,7 +62,7 @@ def parse_quantities(ingredient):
 def parse_description(description):
     product = description
     product_parser = None
-    quantity = None
+    magnitude = None
     units = None
     parser = None
 
@@ -71,7 +71,7 @@ def parse_description(description):
             ingredient = Ingreedy().parse(text)
             product = ingredient['ingredient']
             product_parser = 'ingreedypy'
-            quantity, units, parser = parse_quantities(ingredient)
+            magnitude, units, parser = parse_quantities(ingredient)
             break
         except Exception:
             continue
@@ -84,8 +84,8 @@ def parse_description(description):
             'product_parser': product_parser,
         },
         'markup': f'<mark>{product}</mark>',
-        'quantity': quantity,
-        'quantity_parser': parser,
+        'magnitude': magnitude,
+        'magnitude_parser': parser,
         'units': units,
         'units_parser': parser,
     }
@@ -124,7 +124,7 @@ def parse_descriptions(descriptions):
     for product, ingredient in ingredients_by_product.items():
         ingredients_by_product[product]['markup'] = merge(
             ingredient_markup=ingredient['markup'],
-            quantity=ingredient['quantity'],
+            magnitude=ingredient['magnitude'],
             units=ingredient['units'],
         )
     return list(ingredients_by_product.values())
