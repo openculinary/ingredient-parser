@@ -14,22 +14,22 @@ def ingredient_parser_tests():
     return {
         'tomato': {
             'product': 'tomato',
-            'quantity': None,
+            'magnitude': None,
             'units': None
         },
         '1 kilogram beef': {
             'product': 'beef',
-            'quantity': 1000,
+            'magnitude': 1000,
             'units': 'g'
         },
         '1kg/2lb 4oz potatoes, cut into 5cm/2in chunks': {
             'product': 'potatoes, cut into 5cm/2in chunks',
-            'quantity': 1000,
+            'magnitude': 1000,
             'units': 'g'
         },
         '1-½ ounce, weight vanilla ice cream': {
             'product': 'weight vanilla ice cream',
-            'quantity': 42.52,
+            'magnitude': 42.52,
             'units': 'g'
         },
     }.items()

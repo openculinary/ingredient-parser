@@ -6,16 +6,16 @@ def recipeml_tests():
     return {
         'red wine': {
             'markup': '<mark>red wine</mark>',
-            'quantity': 100,
+            'magnitude': 100,
             'units': 'ml',
         },
         'potatoes au gratin': {
             'markup': '<mark>potatoes</mark> au gratin',
-            'quantity': 5,
+            'magnitude': 5,
         },
         'firm tofu': {
             'markup': '<mark>firm tofu</mark>',
-            'quantity': 1,
+            'magnitude': 1,
             'units': 'block',
         },
         'pinch salt': {
@@ -26,13 +26,13 @@ def recipeml_tests():
 
 
 def expected_markup(ingredient):
-    markup, quantity, units = (
+    markup, magnitude, units = (
         ingredient['markup'],
-        ingredient.get('quantity'),
+        ingredient.get('magnitude'),
         ingredient.get('units'),
     )
     amount_markup = '<amt>'
-    amount_markup += f'<qty>{quantity}</qty>' if quantity else ''
+    amount_markup += f'<qty>{magnitude}</qty>' if magnitude else ''
     amount_markup += f'<unit>{units}</unit>' if units else ''
     amount_markup += '</amt>'
     ingredient_markup = markup.replace('mark>', 'ingredient>')
@@ -44,7 +44,7 @@ def test_request(_, ingredient):
     expected = expected_markup(ingredient)
     result = merge(
         ingredient_markup=ingredient['markup'],
-        quantity=ingredient.get('quantity'),
+        magnitude=ingredient.get('magnitude'),
         units=ingredient.get('units')
     )
     assert result == expected
@@ -52,9 +52,9 @@ def test_request(_, ingredient):
 
 def test_entity_escaping():
     markup = '&amp; <mark>example</mark>'
-    quantity = 1
+    magnitude = 1
 
     expected = '<amt><qty>1</qty></amt>&amp; <ingredient>example</ingredient>'
-    result = merge(markup, quantity, None)
+    result = merge(markup, magnitude, None)
 
     assert result == expected
