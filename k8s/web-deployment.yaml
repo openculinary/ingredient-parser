@@ -20,4 +20,4 @@ spec:
         imagePullPolicy: IfNotPresent
         name: ingredient-parser
         ports:
-        - containerPort: 80
+        - containerPort: 8000
