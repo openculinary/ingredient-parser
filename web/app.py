@@ -92,6 +92,10 @@ def parse_description(description):
     }
 
 
+def determine_nutritional_content(ingredient, nutrition):
+    return nutrition
+
+
 def parse_descriptions(descriptions):
     ingredients_by_product = {}
     for description in descriptions:
@@ -117,7 +121,12 @@ def parse_descriptions(descriptions):
             ingredient['product'] = results[product]['product']
             ingredient['product']['product_parser'] = 'knowledge-graph'
 
-            ingredient['nutrition'] = ingredient['product'].pop('nutrition')
+            nutrition = ingredient['product'].pop('nutrition')
+            if nutrition:
+                ingredient['nutrition'] = determine_nutritional_content(
+                    ingredient=ingredient,
+                    nutrition=nutrition
+                )
 
             # TODO: Remove this remapping once the database handles native IDs
             if 'id' in ingredient['product']:
