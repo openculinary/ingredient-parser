@@ -105,7 +105,10 @@ def parse_descriptions(descriptions):
             raise Exception(f'Parsing failed: "{description}" - {e}')
         product = ingredient['product']['product']
         ingredients_by_product[product] = ingredient
+    return ingredients_by_product
 
+
+def retrieve_knowledge(ingredients_by_product):
     ingredient_data = requests.post(
         url='http://knowledge-graph-service/ingredients/query',
         data={'descriptions[]': list(ingredients_by_product.keys())},
@@ -161,6 +164,7 @@ def root():
     descriptions = request.form.getlist('descriptions[]')
     descriptions = [d.strip() for d in descriptions]
 
-    ingredients = parse_descriptions(descriptions)
+    ingredients_by_product = parse_descriptions(descriptions)
+    ingredients = retrieve_knowledge(ingredients_by_product)
 
     return jsonify(ingredients)

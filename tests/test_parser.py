@@ -7,6 +7,7 @@ from web.app import (
     parse_description,
     parse_descriptions,
     parse_quantities,
+    retrieve_knowledge,
 )
 
 
@@ -104,7 +105,10 @@ def test_knowledge_graph_query():
         body=json.dumps(response),
     )
 
-    results = parse_descriptions(list(description_responses.keys()))
+    descriptions = list(description_responses.keys())
+    ingredients_by_product = parse_descriptions(descriptions)
+    results = retrieve_knowledge(ingredients_by_product)
+
     for result in results:
         description = result['description']
         markup = result['markup'].replace('ingredient>', 'mark>')
