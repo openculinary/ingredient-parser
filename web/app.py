@@ -83,6 +83,7 @@ def parse_description(description):
             'product': product,
             'product_parser': product_parser,
         },
+        'nutrition': None,
         'markup': f'<mark>{product}</mark>',
         'magnitude': magnitude,
         'magnitude_parser': parser,
@@ -115,6 +116,8 @@ def parse_descriptions(descriptions):
             ingredient['markup'] = results[product]['query']['markup']
             ingredient['product'] = results[product]['product']
             ingredient['product']['product_parser'] = 'knowledge-graph'
+
+            ingredient['nutrition'] = ingredient['product'].pop('nutrition')
 
             # TODO: Remove this remapping once the database handles native IDs
             if 'id' in ingredient['product']:

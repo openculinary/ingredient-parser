@@ -109,6 +109,7 @@ def test_knowledge_graph_query():
         description = result['description']
         markup = result['markup'].replace('ingredient>', 'mark>')
         product = result['product']
+        nutrition = result['nutrition']
         response = description_responses.get(description)
 
         if not response['product']:
@@ -119,6 +120,7 @@ def test_knowledge_graph_query():
             assert markup == response['query']['markup']
             assert product['product'] == response['product']['product']
             assert 'graph' in product['product_parser']
+            assert nutrition == response['product']['nutrition']
 
 
 def unit_parser_tests():
