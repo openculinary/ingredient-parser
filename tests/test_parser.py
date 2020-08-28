@@ -54,15 +54,36 @@ def test_parse_description(description, expected):
 def test_knowledge_graph_query():
     description_responses = {
         'whole onion, diced': {
-            'product': {'product': 'onion'},
+            'product': {
+                'product': 'onion',
+                'nutrition': {
+                    'protein': 15.0,
+                    'fat': 0.1,
+                    'carbohydrates': 8.0,
+                    'energy': 35.0,
+                    'fibre': 2.0,
+                }
+            },
             'query': {'markup': 'whole <mark>onion</mark> diced'},
         },
         'splash of tomato ketchup': {
-            'product': {'product': 'tomato ketchup'},
+            'product': {
+                'product': 'tomato ketchup',
+                'nutrition': {
+                    'protein': 1.5,
+                    'fat': 0.1,
+                    'carbohydrates': 28.5,
+                    'energy': 115.0,
+                    'fibre': 1.0,
+                }
+            },
             'query': {'markup': 'splash of <mark>tomato ketchup</mark>'},
         },
         'plantains, peeled and chopped': {
-            'product': {'product': 'plantains, peeled and chopped'},
+            'product': {
+                'product': 'plantains, peeled and chopped',
+                'nutrition': None
+            },
             'query': {'markup': '<mark>plantains, peeled and chopped</mark>'},
         },
         'unknown': {
