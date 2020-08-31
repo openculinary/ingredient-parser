@@ -28,27 +28,32 @@ def parse_quantity(quantity):
     if quantity['unit'] == 'pinch':
         quantity['unit'] = 'ml'
         quantity['amount'] = (quantity.get('amount') or 1) * 0.25
-    try:
-        quantity = unit_registry.Quantity(quantity['amount'], quantity['unit'])
-    except Exception:
-        return
+
+    quantity = unit_registry.Quantity(quantity['amount'], quantity['unit'])
     return quantity.to(get_base_units(quantity) or quantity.units)
 
 
 def parse_quantities(ingredient):
-    magnitude, units, parser = 0, None, 'ingreedypy'
+    parser = 'ingreedypy'
+    quantities = ingredient.get('quantity') or []
+    if not quantities:
+        return None, None, parser
 
-    total = 0
-    for quantity in ingredient.get('quantity') or []:
-        total += parse_quantity(quantity) or 0
+    result = 0
+    for quantity in quantities:
+        try:
+            result += parse_quantity(quantity)
+            parser = 'ingreedypy+pint'
+        except Exception:
+            return None, None, parser
 
-    if total:
-        magnitude = round(total.magnitude, 2)
-        parser = f'{parser}+pint'
-        if not total.dimensionless:
-            units = unit_registry.get_symbol(str(total.units))
+    if not result > 0:
+        return None, None, parser
 
-    return magnitude or None, units, parser
+    units = None
+    if not result.dimensionless:
+        units = unit_registry.get_symbol(str(result.units))
+    return round(result.magnitude, 2), units, parser
 
 
 def parse_description(description):
@@ -66,6 +71,7 @@ def parse_description(description):
             magnitude, units, parser = parse_quantities(ingredient)
             break
         except Exception:
+            raise
             continue
 
     return {
