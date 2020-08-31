@@ -1,6 +1,7 @@
 import pytest
 import responses
 
+from copy import deepcopy
 import json
 
 from web.app import (
@@ -65,8 +66,8 @@ def test_knowledge_graph_query():
                 }
             },
             'query': {'markup': 'whole <mark>onion</mark> diced'},
-            'units': None,
-            'magnitude': None,
+            'units': 'g',
+            'magnitude': 110.0,
         },
         'splash of tomato ketchup': {
             'product': {
@@ -80,8 +81,8 @@ def test_knowledge_graph_query():
                 }
             },
             'query': {'markup': 'splash of <mark>tomato ketchup</mark>'},
-            'units': None,
-            'magnitude': None,
+            'units': 'ml',
+            'magnitude': 3.0,
         },
         'plantains, peeled and chopped': {
             'product': {
@@ -105,24 +106,17 @@ def test_knowledge_graph_query():
         body=json.dumps({'results': description_responses}),
     )
 
-    results = retrieve_knowledge(description_responses)
+    results = retrieve_knowledge(deepcopy(description_responses))
 
     for result in results:
         description = result['description']
-        markup = result['markup']
         product = result['product']
         nutrition = result['nutrition']
         response = description_responses.get(description)
 
-        if not response['product']['product']:
-            assert markup == f'<ingredient>{description}</ingredient>'
-            assert product['product'] == description
-            assert 'graph' not in result['product']['product_parser']
-        else:
-            assert markup == response['markup']
-            assert product['product'] == response['product']['product']
-            assert 'graph' in product['product_parser']
-            assert nutrition == response['nutrition']
+        assert product['product'] == response['product']['product']
+        assert 'graph' in product['product_parser']
+        assert nutrition == response['product'].get('nutrition', nutrition)
 
 
 def unit_parser_tests():
