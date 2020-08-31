@@ -47,7 +47,7 @@ def test_request_dimensionless(client, knowledge_graph_stub):
 
 @patch('web.app.parse_quantity')
 def test_parse_quantity_failure(parse_quantity, client, knowledge_graph_stub):
-    parse_quantity.return_value = None
+    parse_quantity.side_effect = Exception
 
     response = client.post('/', data={'descriptions[]': ['100ml red wine']})
     ingredient = response.json[0]
