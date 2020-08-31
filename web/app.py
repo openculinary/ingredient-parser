@@ -30,7 +30,8 @@ def parse_quantity(quantity):
         quantity['amount'] = (quantity.get('amount') or 1) * 0.25
 
     quantity = unit_registry.Quantity(quantity['amount'], quantity['unit'])
-    return quantity.to(get_base_units(quantity) or quantity.units)
+    base_units = get_base_units(quantity) or quantity.units
+    return quantity.to(base_units)
 
 
 def parse_quantities(ingredient):
