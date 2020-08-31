@@ -83,7 +83,6 @@ def parse_description(description):
             'product': product,
             'product_parser': product_parser,
         },
-        'nutrition': None,
         'markup': f'<mark>{product}</mark>',
         'magnitude': magnitude,
         'magnitude_parser': parser,
@@ -92,8 +91,19 @@ def parse_description(description):
     }
 
 
-def determine_nutritional_content(ingredient, nutrition):
-    return nutrition
+def determine_nutritional_content(ingredient):
+    nutrition = ingredient['product'].pop('nutrition', None)
+    if not nutrition:
+        return None
+    if not ingredient.get('units'):
+        return None
+    if ingredient['units'] == 'g':
+        # perform scaling
+        return nutrition
+    if ingredient['units'] == 'ml':
+        # convert to grams based on density
+        return nutrition
+    raise Exception(f"Unknown unit type: {ingredient['units']}")
 
 
 def parse_descriptions(descriptions):
@@ -123,13 +133,7 @@ def retrieve_knowledge(ingredients_by_product):
             ingredient['markup'] = results[product]['query']['markup']
             ingredient['product'] = results[product]['product']
             ingredient['product']['product_parser'] = 'knowledge-graph'
-
-            nutrition = ingredient['product'].pop('nutrition')
-            if nutrition:
-                ingredient['nutrition'] = determine_nutritional_content(
-                    ingredient=ingredient,
-                    nutrition=nutrition
-                )
+            ingredient['nutrition'] = determine_nutritional_content(ingredient)
 
             # TODO: Remove this remapping once the database handles native IDs
             if 'id' in ingredient['product']:
@@ -137,6 +141,7 @@ def retrieve_knowledge(ingredients_by_product):
                     ingredient['product'].pop('id')
 
     for product, ingredient in ingredients_by_product.items():
+        ingredients_by_product[product]['description'] = product
         ingredients_by_product[product]['markup'] = merge(
             ingredient_markup=ingredient['markup'],
             magnitude=ingredient['magnitude'],

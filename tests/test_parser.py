@@ -5,7 +5,6 @@ import json
 
 from web.app import (
     parse_description,
-    parse_descriptions,
     parse_quantities,
     retrieve_knowledge,
 )
@@ -66,6 +65,8 @@ def test_knowledge_graph_query():
                 }
             },
             'query': {'markup': 'whole <mark>onion</mark> diced'},
+            'units': None,
+            'magnitude': None,
         },
         'splash of tomato ketchup': {
             'product': {
@@ -79,6 +80,8 @@ def test_knowledge_graph_query():
                 }
             },
             'query': {'markup': 'splash of <mark>tomato ketchup</mark>'},
+            'units': None,
+            'magnitude': None,
         },
         'plantains, peeled and chopped': {
             'product': {
@@ -86,45 +89,40 @@ def test_knowledge_graph_query():
                 'nutrition': None
             },
             'query': {'markup': '<mark>plantains, peeled and chopped</mark>'},
+            'units': None,
+            'magnitude': None,
         },
         'unknown': {
-            'product': None,
-            'query': {'markup': 'unknown'},
+            'product': {'product': 'unknown'},
+            'query': {'markup': '<mark>unknown</mark>'},
+            'units': None,
+            'magnitude': None,
         },
-    }
-
-    response = {
-        'results': {
-            d: r if r else None
-            for d, r in description_responses.items()
-        }
     }
     responses.add(
         responses.POST,
         'http://knowledge-graph-service/ingredients/query',
-        body=json.dumps(response),
+        body=json.dumps({'results': description_responses}),
     )
 
-    descriptions = list(description_responses.keys())
-    ingredients_by_product = parse_descriptions(descriptions)
-    results = retrieve_knowledge(ingredients_by_product)
+    results = retrieve_knowledge(description_responses)
 
     for result in results:
         description = result['description']
-        markup = result['markup'].replace('ingredient>', 'mark>')
+        markup = result['markup']
         product = result['product']
         nutrition = result['nutrition']
         response = description_responses.get(description)
 
-        if not response['product']:
-            assert markup == f'<mark>{description}</mark>'
+        if not response['product']['product']:
+            assert markup == f'<ingredient>{description}</ingredient>'
             assert product['product'] == description
             assert 'graph' not in result['product']['product_parser']
         else:
-            assert markup == response['query']['markup']
+            assert markup == response['markup']
             assert product['product'] == response['product']['product']
             assert 'graph' in product['product_parser']
-            assert nutrition == response['product']['nutrition']
+            assert nutrition == response['nutrition']
 
 
 def unit_parser_tests():
