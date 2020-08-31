@@ -72,7 +72,6 @@ def parse_description(description):
             magnitude, units, parser = parse_quantities(ingredient)
             break
         except Exception:
-            raise
             continue
 
     return {
