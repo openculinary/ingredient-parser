@@ -28,19 +28,11 @@ def parse_quantity(quantity):
     if quantity['unit'] == 'pinch':
         quantity['unit'] = 'ml'
         quantity['amount'] = (quantity.get('amount') or 1) * 0.25
-
     try:
-        quantity = unit_registry.Quantity(
-            quantity['amount'],
-            quantity['unit']
-        )
+        quantity = unit_registry.Quantity(quantity['amount'], quantity['unit'])
     except Exception:
         return
-
-    base_units = get_base_units(quantity)
-    if base_units:
-        quantity = quantity.to(base_units)
-    return quantity
+    return quantity.to(get_base_units(quantity) or quantity.units)
 
 
 def parse_quantities(ingredient):
