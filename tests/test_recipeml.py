@@ -1,5 +1,5 @@
 import pytest
-from web.recipeml import merge
+from web.recipeml import render
 
 
 def recipeml_tests():
@@ -42,19 +42,17 @@ def expected_markup(ingredient):
 @pytest.mark.parametrize('_, ingredient', recipeml_tests())
 def test_request(_, ingredient):
     expected = expected_markup(ingredient)
-    result = merge(
-        ingredient_markup=ingredient['markup'],
-        magnitude=ingredient.get('magnitude'),
-        units=ingredient.get('units')
-    )
+    result = render(ingredient)
     assert result == expected
 
 
 def test_entity_escaping():
-    markup = '&amp; <mark>example</mark>'
-    magnitude = 1
+    ingredient = {
+        'markup': '&amp; <mark>example</mark>',
+        'magnitude': 1,
+    }
 
     expected = '<amt><qty>1</qty></amt>&amp; <ingredient>example</ingredient>'
-    result = merge(markup, magnitude, None)
+    result = render(ingredient)
 
     assert result == expected

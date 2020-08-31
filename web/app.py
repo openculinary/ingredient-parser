@@ -4,7 +4,7 @@ import requests
 
 from ingreedypy import Ingreedy
 
-from web.recipeml import merge
+from web.recipeml import render
 
 
 app = Flask(__name__)
@@ -142,11 +142,8 @@ def retrieve_knowledge(ingredients_by_product):
 
     for product, ingredient in ingredients_by_product.items():
         ingredients_by_product[product]['description'] = product
-        ingredients_by_product[product]['markup'] = merge(
-            ingredient_markup=ingredient['markup'],
-            magnitude=ingredient['magnitude'],
-            units=ingredient['units'],
-        )
+        ingredients_by_product[product]['markup'] = render(ingredient)
+
     return list(ingredients_by_product.values())
 
 
