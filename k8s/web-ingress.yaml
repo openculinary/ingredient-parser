@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingredient-parser-ingress
@@ -7,6 +7,10 @@ spec:
   - host: ingredient-parser
     http:
       paths:
-      - backend:
-          serviceName: ingredient-parser-service
-          servicePort: 80
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: ingredient-parser-service
+            port:
+              number: 80
