@@ -8,7 +8,7 @@ from web.recipeml import render
 
 
 app = Flask(__name__)
-unit_registry = UnitRegistry()
+pint = UnitRegistry()
 
 
 def generate_subtexts(description):
@@ -29,7 +29,7 @@ def parse_quantity(quantity):
         quantity['unit'] = 'ml'
         quantity['amount'] = (quantity.get('amount') or 1) * 0.25
 
-    quantity = unit_registry.Quantity(quantity['amount'], quantity['unit'])
+    quantity = pint.Quantity(quantity['amount'], quantity['unit'])
     base_units = get_base_units(quantity) or quantity.units
     return quantity.to(base_units)
 
@@ -53,7 +53,7 @@ def parse_quantities(ingredient):
 
     units = None
     if not result.dimensionless:
-        units = unit_registry.get_symbol(str(result.units))
+        units = pint.get_symbol(str(result.units))
     return round(result.magnitude, 2), units, parser
 
 
@@ -126,13 +126,13 @@ def parse_descriptions(descriptions):
 
 def get_base_units(quantity):
     dimensionalities = {
-        None: unit_registry.Quantity(1),
-        'length': unit_registry.Quantity(1, 'cm'),
-        'volume': unit_registry.Quantity(1, 'ml'),
-        'weight': unit_registry.Quantity(1, 'g'),
+        None: pint.Quantity(1),
+        'length': pint.Quantity(1, 'cm'),
+        'volume': pint.Quantity(1, 'ml'),
+        'weight': pint.Quantity(1, 'g'),
     }
     dimensionalities = {
-        v.dimensionality: unit_registry.get_symbol(str(v.units)) if k else None
+        v.dimensionality: pint.get_symbol(str(v.units)) if k else None
         for k, v in dimensionalities.items()
     }
     return dimensionalities.get(quantity.dimensionality)
