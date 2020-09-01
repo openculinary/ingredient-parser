@@ -85,10 +85,7 @@ def test_knowledge_graph_query():
             'magnitude': 3.0,
         },
         'plantains, peeled and chopped': {
-            'product': {
-                'product': 'plantains, peeled and chopped',
-                'nutrition': None
-            },
+            'product': {'product': 'plantains, peeled and chopped'},
             'query': {'markup': '<mark>plantains, peeled and chopped</mark>'},
         },
         'unknown': {
