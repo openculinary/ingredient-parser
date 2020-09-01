@@ -102,20 +102,19 @@ def parse_descriptions(descriptions):
         data={'descriptions[]': list(ingredients_by_product.keys())},
         proxies={}
     )
-    if ingredient_data.ok:
-        results = ingredient_data.json()['results']
-        for product in results:
-            if results[product]['product'] is None:
-                continue
-            ingredient = ingredients_by_product[product]
-            ingredient['markup'] = results[product]['query']['markup']
-            ingredient['product'] = results[product]['product']
-            ingredient['product']['product_parser'] = 'knowledge-graph'
+    results = ingredient_data.json()['results'] if ingredient_data.ok else []
+    for product in results:
+        if results[product]['product'] is None:
+            continue
+        ingredient = ingredients_by_product[product]
+        ingredient['markup'] = results[product]['query']['markup']
+        ingredient['product'] = results[product]['product']
+        ingredient['product']['product_parser'] = 'knowledge-graph'
 
-            # TODO: Remove this remapping once the database handles native IDs
-            if 'id' in ingredient['product']:
-                ingredient['product']['product_id'] = \
-                    ingredient['product'].pop('id')
+        # TODO: Remove this remapping once the database handles native IDs
+        if 'id' in ingredient['product']:
+            ingredient['product']['product_id'] = \
+                ingredient['product'].pop('id')
 
     for product, ingredient in ingredients_by_product.items():
         ingredients_by_product[product]['markup'] = render(ingredient)
