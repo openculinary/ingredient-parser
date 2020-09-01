@@ -1,12 +1,13 @@
 import pytest
 import responses
 
+from copy import deepcopy
 import json
 
 from web.app import (
     parse_description,
-    parse_descriptions,
     parse_quantities,
+    retrieve_knowledge,
 )
 
 
@@ -66,8 +67,8 @@ def test_knowledge_graph_query():
             'query': {'markup': '<mark>plantains, peeled and chopped</mark>'},
         },
         'unknown': {
-            'product': None,
-            'query': {'markup': 'unknown'},
+            'product': {'product': 'unknown'},
+            'query': {'markup': '<mark>unknown</mark>'},
         },
     }
 
@@ -77,20 +78,14 @@ def test_knowledge_graph_query():
         body=json.dumps({'results': knowledge}),
     )
 
-    ingredients = parse_descriptions(list(knowledge.keys()))
-    for description, ingredient in ingredients.items():
-        markup = ingredient['markup'].replace('ingredient>', 'mark>')
+    results = retrieve_knowledge(deepcopy(knowledge))
+
+    for description, ingredient in results.items():
         product = ingredient['product']
         response = knowledge[description]
 
-        if not response['product']:
-            assert markup == f'<mark>{description}</mark>'
-            assert product['product'] == description
-            assert 'graph' not in product['product_parser']
-        else:
-            assert markup == response['query']['markup']
-            assert product['product'] == response['product']['product']
-            assert 'graph' in product['product_parser']
+        assert product['product'] == response['product']['product']
+        assert 'graph' in product['product_parser']
 
 
 def unit_parser_tests():
