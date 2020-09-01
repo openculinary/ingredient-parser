@@ -53,7 +53,7 @@ def test_parse_description(description, expected):
 
 @responses.activate
 def test_knowledge_graph_query():
-    description_responses = {
+    knowledge = {
         'whole onion, diced': {
             'product': {
                 'product': 'onion',
@@ -100,19 +100,19 @@ def test_knowledge_graph_query():
             'magnitude': None,
         },
     }
+
     responses.add(
         responses.POST,
         'http://knowledge-graph-service/ingredients/query',
-        body=json.dumps({'results': description_responses}),
+        body=json.dumps({'results': knowledge}),
     )
 
-    results = retrieve_knowledge(deepcopy(description_responses))
+    results = retrieve_knowledge(deepcopy(knowledge))
 
-    for result in results:
-        description = result['description']
-        product = result['product']
-        nutrition = result['nutrition']
-        response = description_responses.get(description)
+    for description, ingredient in results.items():
+        product = ingredient['product']
+        nutrition = ingredient['nutrition']
+        response = knowledge[description]
 
         assert product['product'] == response['product']['product']
         assert 'graph' in product['product_parser']

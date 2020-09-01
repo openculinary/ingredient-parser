@@ -8,7 +8,7 @@ from web.recipeml import render
 
 
 app = Flask(__name__)
-unit_registry = UnitRegistry()
+pint = UnitRegistry()
 
 
 def generate_subtexts(description):
@@ -29,7 +29,7 @@ def parse_quantity(quantity):
         quantity['unit'] = 'ml'
         quantity['amount'] = (quantity.get('amount') or 1) * 0.25
 
-    quantity = unit_registry.Quantity(quantity['amount'], quantity['unit'])
+    quantity = pint.Quantity(quantity['amount'], quantity['unit'])
     base_units = get_base_units(quantity) or quantity.units
     return quantity.to(base_units)
 
@@ -40,21 +40,19 @@ def parse_quantities(ingredient):
     if not quantities:
         return None, None, parser
 
-    result = 0
+    total = 0
     for quantity in quantities:
         try:
-            result += parse_quantity(quantity)
+            total += parse_quantity(quantity)
             parser = 'ingreedypy+pint'
         except Exception:
             return None, None, parser
-
-    if not result > 0:
+    if not total > 0:
         return None, None, parser
 
-    units = None
-    if not result.dimensionless:
-        units = unit_registry.get_symbol(str(result.units))
-    return round(result.magnitude, 2), units, parser
+    magnitude = round(total.magnitude, 2)
+    units = None if total.dimensionless else pint.get_symbol(str(total.units))
+    return magnitude, units, parser
 
 
 def parse_description(description):
@@ -121,46 +119,46 @@ def parse_descriptions(descriptions):
 
 
 def retrieve_knowledge(ingredients_by_product):
-    ingredient_data = requests.post(
+    response = requests.post(
         url='http://knowledge-graph-service/ingredients/query',
         data={'descriptions[]': list(ingredients_by_product.keys())},
         proxies={}
     )
-    if ingredient_data.ok:
-        results = ingredient_data.json()['results']
-        for product in results:
-            if results[product]['product'] is None:
-                continue
-            ingredient = ingredients_by_product[product]
-            ingredient['markup'] = results[product]['query']['markup']
-            ingredient['product'] = results[product]['product']
-            ingredient['product']['product_parser'] = 'knowledge-graph'
-            ingredient['nutrition'] = determine_nutritional_content(ingredient)
+    knowledge = response.json()['results'] if response.ok else {}
+    for product in knowledge.keys():
+        if knowledge[product]['product'] is None:
+            continue
+        ingredient = ingredients_by_product[product]
+        ingredient['markup'] = knowledge[product]['query']['markup']
+        ingredient['product'] = knowledge[product]['product']
+        ingredient['product']['product_parser'] = 'knowledge-graph'
+        ingredient['nutrition'] = determine_nutritional_content(ingredient)
 
-            # TODO: Remove this remapping once the database handles native IDs
-            if 'id' in ingredient['product']:
-                ingredient['product']['product_id'] = \
-                    ingredient['product'].pop('id')
-
-    for product, ingredient in ingredients_by_product.items():
-        ingredients_by_product[product]['description'] = product
-        ingredients_by_product[product]['markup'] = render(ingredient)
-
-    return list(ingredients_by_product.values())
+        # TODO: Remove this remapping once the database handles native IDs
+        if 'id' in ingredient['product']:
+            ingredient['product']['product_id'] = \
+                ingredient['product'].pop('id')
+    return ingredients_by_product
 
 
 def get_base_units(quantity):
     dimensionalities = {
-        None: unit_registry.Quantity(1),
-        'length': unit_registry.Quantity(1, 'cm'),
-        'volume': unit_registry.Quantity(1, 'ml'),
-        'weight': unit_registry.Quantity(1, 'g'),
+        None: pint.Quantity(1),
+        'length': pint.Quantity(1, 'cm'),
+        'volume': pint.Quantity(1, 'ml'),
+        'weight': pint.Quantity(1, 'g'),
     }
     dimensionalities = {
-        v.dimensionality: unit_registry.get_symbol(str(v.units)) if k else None
+        v.dimensionality: pint.get_symbol(str(v.units)) if k else None
         for k, v in dimensionalities.items()
     }
     return dimensionalities.get(quantity.dimensionality)
+
+
+def render_markup(ingredients):
+    for product, ingredient in ingredients.items():
+        ingredients[product]['markup'] = render(ingredient)
+    return list(ingredients.values())
 
 
 @app.route('/', methods=['POST'])
@@ -170,5 +168,6 @@ def root():
 
     ingredients_by_product = parse_descriptions(descriptions)
     ingredients = retrieve_knowledge(ingredients_by_product)
+    results = render_markup(ingredients)
 
-    return jsonify(ingredients)
+    return jsonify(results)
