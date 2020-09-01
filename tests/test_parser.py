@@ -90,14 +90,10 @@ def test_knowledge_graph_query():
                 'nutrition': None
             },
             'query': {'markup': '<mark>plantains, peeled and chopped</mark>'},
-            'units': None,
-            'magnitude': None,
         },
         'unknown': {
             'product': {'product': 'unknown'},
             'query': {'markup': '<mark>unknown</mark>'},
-            'units': None,
-            'magnitude': None,
         },
     }
 
