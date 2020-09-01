@@ -47,7 +47,6 @@ def parse_quantities(ingredient):
             parser = 'ingreedypy+pint'
         except Exception:
             return None, None, parser
-
     if not total > 0:
         return None, None, parser
 
