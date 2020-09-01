@@ -40,21 +40,21 @@ def parse_quantities(ingredient):
     if not quantities:
         return None, None, parser
 
-    result = 0
+    total = 0
     for quantity in quantities:
         try:
-            result += parse_quantity(quantity)
+            total += parse_quantity(quantity)
             parser = 'ingreedypy+pint'
         except Exception:
             return None, None, parser
 
-    if not result > 0:
+    if not total > 0:
         return None, None, parser
 
     units = None
-    if not result.dimensionless:
-        units = pint.get_symbol(str(result.units))
-    return round(result.magnitude, 2), units, parser
+    if not total.dimensionless:
+        units = pint.get_symbol(str(total.units))
+    return round(total.magnitude, 2), units, parser
 
 
 def parse_description(description):
