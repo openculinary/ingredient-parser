@@ -95,21 +95,21 @@ def determine_nutritional_content(ingredient):
         return None
     if not ingredient.get('units'):
         return None
+
     if ingredient['units'] == 'g':
-        # perform scaling
-        for nutrient, quantity in nutrition.items():
-            ratio = ingredient['magnitude'] / 100.0
-            scaled_quantity = quantity * ratio
-            nutrition[nutrient] = round(scaled_quantity, 2)
-        return nutrition
-    if ingredient['units'] == 'ml':
+        grams = ingredient['magnitude']
+    elif ingredient['units'] == 'ml':
         # convert to grams based on density
-        for nutrient, quantity in nutrition.items():
-            ratio = ingredient['magnitude'] / 100.0
-            scaled_quantity = quantity * ratio
-            nutrition[nutrient] = round(scaled_quantity, 2)
-        return nutrition
-    raise Exception(f"Unknown unit type: {ingredient['units']}")
+        grams = ingredient['magnitude']
+    else:
+        raise Exception(f"Unknown unit type: {ingredient['units']}")
+
+    # perform scaling
+    for nutrient, quantity in nutrition.items():
+        ratio = grams / 100.0
+        scaled_quantity = quantity * ratio
+        nutrition[nutrient] = round(scaled_quantity, 2)
+    return nutrition
 
 
 def parse_descriptions(descriptions):
