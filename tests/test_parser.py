@@ -55,12 +55,49 @@ def test_parse_description(description, expected):
 def test_knowledge_graph_query():
     knowledge = {
         'whole onion, diced': {
-            'product': {'product': 'onion'},
+            'product': {
+                'product': 'onion',
+                'nutrition': {
+                    'protein': 15.0,
+                    'fat': 0.1,
+                    'carbohydrates': 8.0,
+                    'energy': 35.0,
+                    'fibre': 2.0,
+                }
+            },
             'query': {'markup': 'whole <mark>onion</mark> diced'},
+            'units': 'g',
+            'magnitude': 110.0,
         },
         'splash of tomato ketchup': {
-            'product': {'product': 'tomato ketchup'},
+            'product': {
+                'product': 'tomato ketchup',
+                'nutrition': {
+                    'protein': 1.5,
+                    'fat': 0.1,
+                    'carbohydrates': 28.5,
+                    'energy': 115.0,
+                    'fibre': 1.0,
+                }
+            },
             'query': {'markup': 'splash of <mark>tomato ketchup</mark>'},
+            'units': 'ml',
+            'magnitude': 3.0,
+        },
+        'chunk of butter': {
+            'product': {
+                'product': 'butter',
+                'nutrition': {
+                    'protein': 0.5,
+                    'fat': 82.0,
+                    'carbohydrates': 0.5,
+                    'energy': 745.0,
+                    'fibre': 0.0,
+                }
+            },
+            'query': {'markup': 'chunk of <mark>butter</mark>'},
+            'units': 'ml',
+            'magnitude': 25.0,
         },
         'plantains, peeled and chopped': {
             'product': {'product': 'plantains, peeled and chopped'},
@@ -70,6 +107,30 @@ def test_knowledge_graph_query():
             'product': {'product': 'unknown'},
             'query': {'markup': '<mark>unknown</mark>'},
         },
+    }
+
+    expected_nutrition = {
+        'whole onion, diced': {
+            'protein': 16.5,
+            'fat': 0.11,
+            'carbohydrates': 8.8,
+            'energy': 38.5,
+            'fibre': 2.2,
+        },
+        'splash of tomato ketchup': {
+            'protein': 0.04,
+            'fat': 0.0,
+            'carbohydrates': 0.85,
+            'energy': 3.45,
+            'fibre': 0.03,
+        },
+        'chunk of butter': {
+            'protein': round(0.5 * 0.911 / 4, 2),
+            'fat': round(82.0 * 0.911 / 4, 2),
+            'carbohydrates': round(0.5 * 0.911 / 4, 2),
+            'energy': round(745.0 * 0.911 / 4, 2),
+            'fibre': round(0.0 * 0.911 / 4, 2),
+        }
     }
 
     responses.add(
@@ -82,10 +143,14 @@ def test_knowledge_graph_query():
 
     for description, ingredient in results.items():
         product = ingredient['product']
-        response = knowledge[description]
+        product_expected = knowledge[description]['product']['product']
 
-        assert product['product'] == response['product']['product']
+        nutrition = ingredient['nutrition']
+        nutrition_expected = expected_nutrition.get(description)
+
+        assert product['product'] == product_expected
         assert 'graph' in product['product_parser']
+        assert nutrition == nutrition_expected
 
 
 def unit_parser_tests():

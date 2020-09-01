@@ -87,6 +87,48 @@ def parse_description(description):
     }
 
 
+def determine_density_ratio(product):
+    ratio = 1.0
+    if 'flour' in product:
+        ratio = 0.593
+    elif 'sugar' in product:
+        ratio = 0.850
+    elif 'milk' in product:
+        ratio = 1.030
+    elif 'cream' in product:
+        ratio = 1.010
+    elif 'oil' in product:
+        ratio = 0.900
+    elif 'butter' in product:
+        ratio = 0.911
+    return ratio
+
+
+def determine_nutritional_content(ingredient):
+    nutrition = ingredient['product'].pop('nutrition', None)
+    if not nutrition:
+        return None
+    if not ingredient.get('magnitude'):
+        return None
+    if not ingredient.get('units'):
+        return None
+
+    if ingredient['units'] == 'g':
+        grams = ingredient['magnitude']
+    elif ingredient['units'] == 'ml':
+        # convert to grams based on density
+        ratio = determine_density_ratio(ingredient['product']['product'])
+        grams = ingredient['magnitude'] * ratio
+    else:
+        raise Exception(f"Unknown unit type: {ingredient['units']}")
+
+    for nutrient, quantity in nutrition.items():
+        ratio = grams / 100.0
+        scaled_quantity = quantity * ratio
+        nutrition[nutrient] = round(scaled_quantity, 2)
+    return nutrition
+
+
 def parse_descriptions(descriptions):
     ingredients_by_product = {}
     for description in descriptions:
@@ -113,6 +155,7 @@ def retrieve_knowledge(ingredients_by_product):
         ingredient['markup'] = knowledge[product]['query']['markup']
         ingredient['product'] = knowledge[product]['product']
         ingredient['product']['product_parser'] = 'knowledge-graph'
+        ingredient['nutrition'] = determine_nutritional_content(ingredient)
 
         # TODO: Remove this remapping once the database handles native IDs
         if 'id' in ingredient['product']:
