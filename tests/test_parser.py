@@ -94,6 +94,23 @@ def test_knowledge_graph_query():
         },
     }
 
+    expected_nutrition = {
+        'whole onion, diced': {
+            'protein': 16.5,
+            'fat': 0.11,
+            'carbohydrates': 8.8,
+            'energy': 38.5,
+            'fibre': 2.2,
+        },
+        'splash of tomato ketchup': {
+            'protein': 0.04,
+            'fat': 0.0,
+            'carbohydrates': 0.85,
+            'energy': 3.45,
+            'fibre': 0.03,
+        },
+    }
+
     responses.add(
         responses.POST,
         'http://knowledge-graph-service/ingredients/query',
@@ -104,12 +121,14 @@ def test_knowledge_graph_query():
 
     for description, ingredient in results.items():
         product = ingredient['product']
-        nutrition = ingredient['nutrition']
-        response = knowledge[description]
+        product_expected = knowledge[description]['product']['product']
 
-        assert product['product'] == response['product']['product']
+        nutrition = ingredient['nutrition']
+        nutrition_expected = expected_nutrition.get(description)
+
+        assert product['product'] == product_expected
         assert 'graph' in product['product_parser']
-        assert nutrition == response['product'].get('nutrition', nutrition)
+        assert nutrition == nutrition_expected
 
 
 def unit_parser_tests():
