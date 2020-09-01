@@ -97,18 +97,18 @@ def parse_descriptions(descriptions):
         product = ingredient['product']['product']
         ingredients_by_product[product] = ingredient
 
-    ingredient_data = requests.post(
+    response = requests.post(
         url='http://knowledge-graph-service/ingredients/query',
         data={'descriptions[]': list(ingredients_by_product.keys())},
         proxies={}
     )
-    results = ingredient_data.json()['results'] if ingredient_data.ok else []
-    for product in results:
-        if results[product]['product'] is None:
+    knowledge = response.json()['results'] if response.ok else {}
+    for product in knowledge.keys():
+        if knowledge[product]['product'] is None:
             continue
         ingredient = ingredients_by_product[product]
-        ingredient['markup'] = results[product]['query']['markup']
-        ingredient['product'] = results[product]['product']
+        ingredient['markup'] = knowledge[product]['query']['markup']
+        ingredient['product'] = knowledge[product]['product']
         ingredient['product']['product_parser'] = 'knowledge-graph'
 
         # TODO: Remove this remapping once the database handles native IDs
