@@ -51,10 +51,9 @@ def parse_quantities(ingredient):
     if not total > 0:
         return None, None, parser
 
-    units = None
-    if not total.dimensionless:
-        units = pint.get_symbol(str(total.units))
-    return round(total.magnitude, 2), units, parser
+    magnitude = round(total.magnitude, 2)
+    units = None if total.dimensionless else pint.get_symbol(str(total.units))
+    return magnitude, units, parser
 
 
 def parse_description(description):
