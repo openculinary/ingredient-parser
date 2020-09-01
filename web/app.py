@@ -115,10 +115,7 @@ def parse_descriptions(descriptions):
         if 'id' in ingredient['product']:
             ingredient['product']['product_id'] = \
                 ingredient['product'].pop('id')
-
-    for product, ingredient in ingredients_by_product.items():
-        ingredients_by_product[product]['markup'] = render(ingredient)
-    return list(ingredients_by_product.values())
+    return ingredients_by_product
 
 
 def get_base_units(quantity):
@@ -135,11 +132,18 @@ def get_base_units(quantity):
     return dimensionalities.get(quantity.dimensionality)
 
 
+def render_markup(ingredients):
+    for product, ingredient in ingredients.items():
+        ingredients[product]['markup'] = render(ingredient)
+    return list(ingredients.values())
+
+
 @app.route('/', methods=['POST'])
 def root():
     descriptions = request.form.getlist('descriptions[]')
     descriptions = [d.strip() for d in descriptions]
 
     ingredients = parse_descriptions(descriptions)
+    results = render_markup(ingredients)
 
-    return jsonify(ingredients)
+    return jsonify(results)

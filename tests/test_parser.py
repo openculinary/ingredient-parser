@@ -52,7 +52,7 @@ def test_parse_description(description, expected):
 
 @responses.activate
 def test_knowledge_graph_query():
-    description_responses = {
+    knowledge = {
         'whole onion, diced': {
             'product': {'product': 'onion'},
             'query': {'markup': 'whole <mark>onion</mark> diced'},
@@ -71,29 +71,22 @@ def test_knowledge_graph_query():
         },
     }
 
-    response = {
-        'results': {
-            d: r if r else None
-            for d, r in description_responses.items()
-        }
-    }
     responses.add(
         responses.POST,
         'http://knowledge-graph-service/ingredients/query',
-        body=json.dumps(response),
+        body=json.dumps({'results': knowledge}),
     )
 
-    results = parse_descriptions(list(description_responses.keys()))
-    for result in results:
-        description = result['description']
-        markup = result['markup'].replace('ingredient>', 'mark>')
-        product = result['product']
-        response = description_responses.get(description)
+    ingredients = parse_descriptions(list(knowledge.keys()))
+    for description, ingredient in ingredients.items():
+        markup = ingredient['markup'].replace('ingredient>', 'mark>')
+        product = ingredient['product']
+        response = knowledge[description]
 
         if not response['product']:
             assert markup == f'<mark>{description}</mark>'
             assert product['product'] == description
-            assert 'graph' not in result['product']['product_parser']
+            assert 'graph' not in product['product_parser']
         else:
             assert markup == response['query']['markup']
             assert product['product'] == response['product']['product']
