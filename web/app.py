@@ -178,7 +178,7 @@ def get_base_units(quantity):
     return dimensionalities.get(quantity.dimensionality)
 
 
-def render_markup(ingredients):
+def attach_markup(ingredients):
     for product, ingredient in ingredients.items():
         ingredients[product]['markup'] = render(ingredient)
     return list(ingredients.values())
@@ -191,6 +191,6 @@ def root():
 
     ingredients_by_product = parse_descriptions(descriptions)
     ingredients = retrieve_knowledge(ingredients_by_product)
-    results = render_markup(ingredients)
+    ingredients = attach_markup(ingredients)
 
-    return jsonify(results)
+    return jsonify(ingredients)
