@@ -84,6 +84,21 @@ def test_knowledge_graph_query():
             'units': 'ml',
             'magnitude': 3.0,
         },
+        'chunk of butter': {
+            'product': {
+                'product': 'butter',
+                'nutrition': {
+                    'protein': 0.5,
+                    'fat': 82.0,
+                    'carbohydrates': 0.5,
+                    'energy': 745.0,
+                    'fibre': 0.0,
+                }
+            },
+            'query': {'markup': 'chunk of <mark>butter</mark>'},
+            'units': 'ml',
+            'magnitude': 25.0,
+        },
         'plantains, peeled and chopped': {
             'product': {'product': 'plantains, peeled and chopped'},
             'query': {'markup': '<mark>plantains, peeled and chopped</mark>'},
@@ -109,6 +124,13 @@ def test_knowledge_graph_query():
             'energy': 3.45,
             'fibre': 0.03,
         },
+        'chunk of butter': {
+            'protein': round(0.5 * 0.911 / 4, 2),
+            'fat': round(82.0 * 0.911 / 4, 2),
+            'carbohydrates': round(0.5 * 0.911 / 4, 2),
+            'energy': round(745.0 * 0.911 / 4, 2),
+            'fibre': round(0.0 * 0.911 / 4, 2),
+        }
     }
 
     responses.add(

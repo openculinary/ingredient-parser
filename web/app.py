@@ -87,6 +87,23 @@ def parse_description(description):
     }
 
 
+def determine_density_ratio(product):
+    ratio = 1.0
+    if 'flour' in product:
+        ratio = 0.593
+    elif 'sugar' in product:
+        ratio = 0.850
+    elif 'milk' in product:
+        ratio = 1.030
+    elif 'cream' in product:
+        ratio = 1.010
+    elif 'oil' in product:
+        ratio = 0.900
+    elif 'butter' in product:
+        ratio = 0.911
+    return ratio
+
+
 def determine_nutritional_content(ingredient):
     nutrition = ingredient['product'].pop('nutrition', None)
     if not nutrition:
@@ -100,7 +117,8 @@ def determine_nutritional_content(ingredient):
         grams = ingredient['magnitude']
     elif ingredient['units'] == 'ml':
         # convert to grams based on density
-        grams = ingredient['magnitude']
+        ratio = determine_density_ratio(ingredient['product']['product'])
+        grams = ingredient['magnitude'] * ratio
     else:
         raise Exception(f"Unknown unit type: {ingredient['units']}")
 
