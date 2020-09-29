@@ -123,6 +123,7 @@ def determine_nutritional_content(ingredient):
         raise Exception(f"Unknown unit type: {ingredient['units']}")
 
     for nutrient, quantity in nutrition.items():
+        quantity = quantity or 0
         ratio = grams / 100.0
         scaled_quantity = quantity * ratio
         nutrition[nutrient] = round(scaled_quantity, 2)

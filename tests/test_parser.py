@@ -92,7 +92,7 @@ def test_knowledge_graph_query():
                     'fat': 82.0,
                     'carbohydrates': 0.5,
                     'energy': 745.0,
-                    'fibre': 0.0,
+                    'fibre': None,
                 }
             },
             'query': {'markup': 'chunk of <mark>butter</mark>'},
