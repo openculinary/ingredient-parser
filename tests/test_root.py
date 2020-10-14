@@ -24,7 +24,7 @@ def request_tests():
             'product': 'salt',
             'magnitude': 0.25,
             'units': 'ml',
-            'relative_density': 1.0,
+            'relative_density': 1.0,  # TODO: investigate this value
         },
         '2ml olive oil': {
             'product': 'olive oil',
