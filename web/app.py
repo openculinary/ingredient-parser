@@ -89,20 +89,19 @@ def parse_description(description):
 
 def determine_relative_density(ingredient):
     product = ingredient['product']['product']
-    ratio = 1.0
     if 'flour' in product:
-        ratio = 0.593
+        return 0.593
     elif 'sugar' in product:
-        ratio = 0.850
+        return 0.850
     elif 'milk' in product:
-        ratio = 1.030
+        return 1.030
     elif 'cream' in product:
-        ratio = 1.010
+        return 1.010
     elif 'oil' in product:
-        ratio = 0.900
+        return 0.900
     elif 'butter' in product:
-        ratio = 0.911
-    return ratio
+        return 0.911
+    return 1.0
 
 
 def determine_nutritional_content(ingredient):
