@@ -88,6 +88,8 @@ def parse_description(description):
 
 
 def determine_relative_density(ingredient):
+    if ingredient.get('units') != 'ml':
+        return None
     product = ingredient['product']['product']
     if 'flour' in product:
         return 0.593
@@ -117,8 +119,7 @@ def determine_nutritional_content(ingredient):
         grams = ingredient['magnitude']
     elif ingredient['units'] == 'ml':
         # convert to grams based on density
-        relative_density = determine_relative_density(ingredient)
-        grams = ingredient['magnitude'] * relative_density
+        grams = ingredient['magnitude'] * ingredient['density']
     else:
         raise Exception(f"Unknown unit type: {ingredient['units']}")
 
@@ -156,12 +157,12 @@ def retrieve_knowledge(ingredients_by_product):
         ingredient['markup'] = knowledge[product]['query']['markup']
         ingredient['product'] = knowledge[product]['product']
         ingredient['product']['product_parser'] = 'knowledge-graph'
-        ingredient['nutrition'] = determine_nutritional_content(ingredient)
 
         # TODO: Remove this remapping once the database handles native IDs
         if 'id' in ingredient['product']:
             ingredient['product']['product_id'] = \
                 ingredient['product'].pop('id')
+
     return ingredients_by_product
 
 
@@ -179,6 +180,13 @@ def get_base_units(quantity):
     return dimensionalities.get(quantity.dimensionality)
 
 
+def attach_nutrition(ingredients):
+    for ingredient in ingredients.values():
+        ingredient['density'] = determine_relative_density(ingredient)
+        ingredient['nutrition'] = determine_nutritional_content(ingredient)
+    return ingredients
+
+
 def attach_markup(ingredients):
     for product, ingredient in ingredients.items():
         ingredients[product]['markup'] = render(ingredient)
@@ -192,6 +200,7 @@ def root():
 
     ingredients_by_product = parse_descriptions(descriptions)
     ingredients = retrieve_knowledge(ingredients_by_product)
+    ingredients = attach_nutrition(ingredients)
     ingredients = attach_markup(ingredients)
 
     return jsonify(ingredients)

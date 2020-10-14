@@ -5,6 +5,7 @@ from copy import deepcopy
 import json
 
 from web.app import (
+    attach_nutrition,
     parse_description,
     parse_quantities,
     retrieve_knowledge,
@@ -140,6 +141,7 @@ def test_knowledge_graph_query():
     )
 
     results = retrieve_knowledge(deepcopy(knowledge))
+    results = attach_nutrition(results)
 
     for description, ingredient in results.items():
         product = ingredient['product']
