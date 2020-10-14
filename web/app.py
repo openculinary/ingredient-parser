@@ -87,7 +87,8 @@ def parse_description(description):
     }
 
 
-def determine_relative_density(product):
+def determine_relative_density(ingredient):
+    product = ingredient['product']['product']
     ratio = 1.0
     if 'flour' in product:
         ratio = 0.593
@@ -117,7 +118,7 @@ def determine_nutritional_content(ingredient):
         grams = ingredient['magnitude']
     elif ingredient['units'] == 'ml':
         # convert to grams based on density
-        ratio = determine_relative_density(ingredient['product']['product'])
+        ratio = determine_relative_density(ingredient)
         grams = ingredient['magnitude'] * ratio
     else:
         raise Exception(f"Unknown unit type: {ingredient['units']}")
