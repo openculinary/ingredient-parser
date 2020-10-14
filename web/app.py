@@ -117,8 +117,8 @@ def determine_nutritional_content(ingredient):
         grams = ingredient['magnitude']
     elif ingredient['units'] == 'ml':
         # convert to grams based on density
-        ratio = determine_relative_density(ingredient)
-        grams = ingredient['magnitude'] * ratio
+        relative_density = determine_relative_density(ingredient)
+        grams = ingredient['magnitude'] * relative_density
     else:
         raise Exception(f"Unknown unit type: {ingredient['units']}")
 
