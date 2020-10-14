@@ -5,6 +5,7 @@ from copy import deepcopy
 import json
 
 from web.app import (
+    attach_nutrition,
     parse_description,
     parse_quantities,
     retrieve_knowledge,
@@ -140,6 +141,7 @@ def test_knowledge_graph_query():
     )
 
     results = retrieve_knowledge(deepcopy(knowledge))
+    results = attach_nutrition(results)
 
     for description, ingredient in results.items():
         product = ingredient['product']
@@ -147,6 +149,9 @@ def test_knowledge_graph_query():
 
         nutrition = ingredient['nutrition']
         nutrition_expected = expected_nutrition.get(description)
+
+        if ingredient.get('units') == 'ml':
+            assert ingredient['relative_density'] is not None
 
         assert product['product'] == product_expected
         assert 'graph' in product['product_parser']

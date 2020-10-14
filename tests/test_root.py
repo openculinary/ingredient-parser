@@ -8,6 +8,7 @@ def request_tests():
             'product': 'red wine',
             'magnitude': 100,
             'units': 'ml',
+            'relative_density': 1.0,
         },
         '1000 grams potatoes': {
             'product': 'potatoes',
@@ -23,6 +24,13 @@ def request_tests():
             'product': 'salt',
             'magnitude': 0.25,
             'units': 'ml',
+            'relative_density': 1.0,  # TODO: investigate this value
+        },
+        '2ml olive oil': {
+            'product': 'olive oil',
+            'magnitude': 2,
+            'units': 'ml',
+            'relative_density': 0.9,
         },
     }.items()
 
@@ -35,6 +43,9 @@ def test_request(client, knowledge_graph_stub, description, expected):
     assert ingredient['product']['product'] == expected['product']
     assert ingredient['magnitude'] == expected['magnitude']
     assert ingredient['units'] == expected['units']
+
+    if 'relative_density' in expected:
+        assert ingredient['relative_density'] == expected['relative_density']
 
 
 def test_request_dimensionless(client, knowledge_graph_stub):
