@@ -162,7 +162,6 @@ def retrieve_knowledge(ingredients_by_product):
         if 'id' in ingredient['product']:
             ingredient['product']['product_id'] = \
                 ingredient['product'].pop('id')
-
     return ingredients_by_product
 
 
