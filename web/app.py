@@ -123,12 +123,15 @@ def determine_nutritional_content(ingredient):
     else:
         raise Exception(f"Unknown unit type: {ingredient['units']}")
 
+    results = {}
+    nutrient_units = {'energy': 'cal'}
     for nutrient, quantity in nutrition.items():
         quantity = quantity or 0
         ratio = grams / 100.0
         scaled_quantity = quantity * ratio
-        nutrition[nutrient] = round(scaled_quantity, 2)
-    return nutrition
+        results[f'{nutrient}'] = round(scaled_quantity, 2)
+        results[f'{nutrient}_units'] = nutrient_units.get(nutrient, 'g')
+    return results
 
 
 def parse_descriptions(descriptions):

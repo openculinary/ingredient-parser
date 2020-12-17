@@ -148,6 +148,10 @@ def test_knowledge_graph_query():
         product_expected = knowledge[description]['product']['product']
 
         nutrition = ingredient['nutrition']
+        nutrition = None if nutrition is None else {
+            nutrient: amount for nutrient, amount in nutrition.items()
+            if not nutrient.endswith('_units')
+        }
         nutrition_expected = expected_nutrition.get(description)
 
         if ingredient.get('units') == 'ml':
