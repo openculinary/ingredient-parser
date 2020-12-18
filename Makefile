@@ -17,21 +17,36 @@ deploy:
 image:
 	$(eval container=$(shell buildah from docker.io/library/python:3.8-alpine))
 	buildah copy $(container) 'web' 'web'
-	buildah copy $(container) 'Pipfile'
+	buildah copy $(container) 'requirements.txt'
 	buildah run $(container) -- adduser -h /srv/ -s /sbin/nologin -D -H gunicorn --
 	buildah run $(container) -- chown gunicorn /srv/ --
-	buildah run --user gunicorn $(container) -- pip install --user pipenv --
-	buildah run --user gunicorn $(container) -- /srv/.local/bin/pipenv install --skip-lock --
+	buildah run --user gunicorn $(container) -- pip install --no-warn-script-location --requirement requirements.txt --user --
 	# Begin: HACK: For rootless compatibility across podman and k8s environments, unset file ownership and grant read+exec to binaries
 	buildah run $(container) -- chown -R nobody:nobody /srv/ --
 	buildah run $(container) -- chmod -R a+rx /srv/.local/bin/ --
 	buildah run $(container) -- find /srv/ -type d -exec chmod a+rx {} \;
 	# End: HACK
-	buildah config --port 8000 --user gunicorn --entrypoint '/srv/.local/bin/pipenv run gunicorn web.app:app --bind :8000' $(container)
-	buildah commit --squash --rm $(container) ${IMAGE_NAME}:${IMAGE_TAG}
+	buildah config --cmd '/srv/.local/bin/gunicorn web.app:app --bind :8000' --port 8000 --user gunicorn $(container)
+	buildah commit --rm --squash $(container) ${IMAGE_NAME}:${IMAGE_TAG}
 
-lint:
-	pipenv run flake8
+# Virtualenv Makefile pattern derived from https://github.com/bottlepy/bottle/
+venv: venv/.installed requirements.txt requirements-dev.txt
+	venv/bin/pip install --requirement requirements-dev.txt
+	touch venv
+venv/.installed:
+	python3 -m venv venv
+	venv/bin/pip install pip-tools
+	touch venv/.installed
 
-tests:
-	pipenv run pytest tests
+requirements.txt: requirements.in
+	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-header requirements.in
+
+requirements-dev.txt: requirements-dev.in
+	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-header requirements-dev.in
+
+lint: venv
+	venv/bin/flake8 tests
+	venv/bin/flake8 web
+
+tests: venv
+	venv/bin/pytest tests
