@@ -1,0 +1,4 @@
+--requirement requirements.txt
+flake8
+pytest
+responses
