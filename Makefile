@@ -20,7 +20,7 @@ image:
 	buildah copy $(container) 'requirements.txt'
 	buildah run $(container) -- adduser -h /srv/ -s /sbin/nologin -D -H gunicorn --
 	buildah run $(container) -- chown gunicorn /srv/ --
-	buildah run --user gunicorn $(container) -- pip install --no-warn-script-location --requirement requirements.txt --user --
+	buildah run --user gunicorn $(container) -- pip install --no-warn-script-location --progress-bar off --requirement requirements.txt --user --
 	# Begin: HACK: For rootless compatibility across podman and k8s environments, unset file ownership and grant read+exec to binaries
 	buildah run $(container) -- chown -R nobody:nobody /srv/ --
 	buildah run $(container) -- chmod -R a+rx /srv/.local/bin/ --
@@ -31,7 +31,7 @@ image:
 
 # Virtualenv Makefile pattern derived from https://github.com/bottlepy/bottle/
 venv: venv/.installed requirements.txt requirements-dev.txt
-	venv/bin/pip install --requirement requirements-dev.txt
+	venv/bin/pip install --requirement requirements-dev.txt --quiet
 	touch venv
 venv/.installed:
 	python3 -m venv venv
@@ -39,10 +39,10 @@ venv/.installed:
 	touch venv/.installed
 
 requirements.txt: requirements.in
-	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-header requirements.in
+	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-header --quiet requirements.in
 
 requirements-dev.txt: requirements-dev.in
-	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-header requirements-dev.in
+	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-header --quiet requirements-dev.in
 
 lint: venv
 	venv/bin/flake8 tests
