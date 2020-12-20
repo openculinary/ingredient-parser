@@ -24,3 +24,8 @@ def render(ingredient):
     amt = f'<amt>{amt}</amt>' if amt else ''
 
     return amt + doc
+
+
+def wrap(product):
+    product = escape(product)
+    return f'<mark>{product}</mark>'

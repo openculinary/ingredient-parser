@@ -32,6 +32,12 @@ def request_tests():
             'units': 'ml',
             'relative_density': 0.9,
         },
+        '20ml sweet & sour': {
+            'product': 'sweet & sour',
+            'magnitude': 20,
+            'units': 'ml',
+            'relative_density': 1.0,
+        },
     }.items()
 
 

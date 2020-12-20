@@ -4,7 +4,7 @@ import requests
 
 from ingreedypy import Ingreedy
 
-from web.recipeml import render
+from web.recipeml import render, wrap
 
 
 app = Flask(__name__)
@@ -79,7 +79,7 @@ def parse_description(description):
             'product': product,
             'product_parser': product_parser,
         },
-        'markup': f'<mark>{product}</mark>',
+        'markup': wrap(product),
         'magnitude': magnitude,
         'magnitude_parser': parser,
         'units': units,
