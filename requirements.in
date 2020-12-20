@@ -1,5 +1,5 @@
 flask==1.1.2
 gunicorn==20.0.4
-ingreedypy==1.3.4
+ingreedypy==1.3.5
 pint==0.16.1
 requests==2.25.1
