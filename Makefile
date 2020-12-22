@@ -1,4 +1,4 @@
-.PHONY: build lint tests
+.PHONY: build deploy image lint tests
 
 SERVICE=$(shell basename $(shell git rev-parse --show-toplevel))
 REGISTRY=registry.openculinary.org
@@ -8,7 +8,7 @@ IMAGE_NAME=${REGISTRY}/${PROJECT}/${SERVICE}
 IMAGE_COMMIT := $(shell git rev-parse --short HEAD)
 IMAGE_TAG := $(strip $(if $(shell git status --porcelain --untracked-files=no), latest, ${IMAGE_COMMIT}))
 
-build: lint tests image
+build: image
 
 deploy:
 	kubectl apply -f k8s
