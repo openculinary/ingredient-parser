@@ -1,4 +1,4 @@
-flask==1.1.2
+flask==2.0.0
 gunicorn==20.1.0
 ingreedypy==1.3.5
 pint==0.17.0
