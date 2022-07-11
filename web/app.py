@@ -13,30 +13,30 @@ pint = UnitRegistry()
 
 def generate_subtexts(description):
     yield description
-    if '/' in description:
-        pre_text, post_text = description.split('/', 1)
-        post_tokens = post_text.split(' ')
+    if "/" in description:
+        pre_text, post_text = description.split("/", 1)
+        post_tokens = post_text.split(" ")
         if pre_text:
-            yield u'{} {}'.format(pre_text, u' '.join(post_tokens[1:]))
-        yield u' '.join(post_tokens)
-    yield description.replace(',', '')
+            yield "{} {}".format(pre_text, " ".join(post_tokens[1:]))
+        yield " ".join(post_tokens)
+    yield description.replace(",", "")
 
 
 def parse_quantity(quantity):
     # Workaround: pint treats 'pinch' as 'pico-inch'
     # https://github.com/hgrecco/pint/issues/273
-    if quantity['unit'] == 'pinch':
-        quantity['unit'] = 'ml'
-        quantity['amount'] = (quantity.get('amount') or 1) * 0.25
+    if quantity["unit"] == "pinch":
+        quantity["unit"] = "ml"
+        quantity["amount"] = (quantity.get("amount") or 1) * 0.25
 
-    quantity = pint.Quantity(quantity['amount'], quantity['unit'])
+    quantity = pint.Quantity(quantity["amount"], quantity["unit"])
     base_units = get_base_units(quantity) or quantity.units
     return quantity.to(base_units)
 
 
 def parse_quantities(ingredient):
-    parser = 'ingreedypy'
-    quantities = ingredient.get('quantity') or []
+    parser = "ingreedypy"
+    quantities = ingredient.get("quantity") or []
     if not quantities:
         return None, None, parser
 
@@ -44,7 +44,7 @@ def parse_quantities(ingredient):
     for quantity in quantities:
         try:
             total += parse_quantity(quantity)
-            parser = 'ingreedypy+pint'
+            parser = "ingreedypy+pint"
         except Exception:
             return None, None, parser
     if not total > 0:
@@ -64,72 +64,72 @@ def parse_description(description):
 
     for text in generate_subtexts(description):
         ingredient = Ingreedy().parse(text)
-        product = ingredient.get('ingredient')
+        product = ingredient.get("ingredient")
         if not product:
             continue
-        product_parser = 'ingreedypy'
+        product_parser = "ingreedypy"
         magnitude, units, parser = parse_quantities(ingredient)
         break
 
     return {
-        'description': description,
-        'product': {
-            'product_id': None,
-            'product': product,
-            'product_parser': product_parser,
+        "description": description,
+        "product": {
+            "product_id": None,
+            "product": product,
+            "product_parser": product_parser,
         },
-        'markup': wrap(product),
-        'magnitude': magnitude,
-        'magnitude_parser': parser,
-        'units': units,
-        'units_parser': parser,
+        "markup": wrap(product),
+        "magnitude": magnitude,
+        "magnitude_parser": parser,
+        "units": units,
+        "units_parser": parser,
     }
 
 
 def determine_relative_density(ingredient):
-    if ingredient.get('units') != 'ml':
+    if ingredient.get("units") != "ml":
         return None
-    product = ingredient['product']['product']
-    if 'flour' in product:
+    product = ingredient["product"]["product"]
+    if "flour" in product:
         return 0.593
-    elif 'sugar' in product:
+    elif "sugar" in product:
         return 0.850
-    elif 'milk' in product:
+    elif "milk" in product:
         return 1.030
-    elif 'cream' in product:
+    elif "cream" in product:
         return 1.010
-    elif 'oil' in product:
+    elif "oil" in product:
         return 0.900
-    elif 'butter' in product:
+    elif "butter" in product:
         return 0.911
     return 1.0
 
 
 def determine_nutritional_content(ingredient):
-    nutrition = ingredient['product'].pop('nutrition', None)
+    nutrition = ingredient["product"].pop("nutrition", None)
     if not nutrition:
         return None
-    if not ingredient.get('magnitude'):
+    if not ingredient.get("magnitude"):
         return None
-    if not ingredient.get('units'):
+    if not ingredient.get("units"):
         return None
 
-    if ingredient['units'] == 'g':
-        grams = ingredient['magnitude']
-    elif ingredient['units'] == 'ml':
+    if ingredient["units"] == "g":
+        grams = ingredient["magnitude"]
+    elif ingredient["units"] == "ml":
         # convert to grams based on density
-        grams = ingredient['magnitude'] * ingredient['relative_density']
+        grams = ingredient["magnitude"] * ingredient["relative_density"]
     else:
         raise Exception(f"Unknown unit type: {ingredient['units']}")
 
     results = {}
-    nutrient_units = {'energy': 'cal'}
+    nutrient_units = {"energy": "cal"}
     for nutrient, quantity in nutrition.items():
         quantity = quantity or 0
         ratio = grams / 100.0
         scaled_quantity = quantity * ratio
-        results[f'{nutrient}'] = round(scaled_quantity, 2)
-        results[f'{nutrient}_units'] = nutrient_units.get(nutrient, 'g')
+        results[f"{nutrient}"] = round(scaled_quantity, 2)
+        results[f"{nutrient}_units"] = nutrient_units.get(nutrient, "g")
     return results
 
 
@@ -140,39 +140,38 @@ def parse_descriptions(descriptions):
             ingredient = parse_description(description)
         except Exception as e:
             raise Exception(f'Parsing failed: "{description}" - {e}')
-        product = ingredient['product']['product']
+        product = ingredient["product"]["product"]
         ingredients_by_product[product] = ingredient
     return ingredients_by_product
 
 
 def retrieve_knowledge(ingredients_by_product):
     response = requests.post(
-        url='http://knowledge-graph-service/ingredients/query',
-        data={'descriptions[]': list(ingredients_by_product.keys())},
-        proxies={}
+        url="http://knowledge-graph-service/ingredients/query",
+        data={"descriptions[]": list(ingredients_by_product.keys())},
+        proxies={},
     )
-    knowledge = response.json()['results'] if response.ok else {}
+    knowledge = response.json()["results"] if response.ok else {}
     for product in knowledge.keys():
-        if knowledge[product]['product'] is None:
+        if knowledge[product]["product"] is None:
             continue
         ingredient = ingredients_by_product[product]
-        ingredient['markup'] = knowledge[product]['query']['markup']
-        ingredient['product'] = knowledge[product]['product']
-        ingredient['product']['product_parser'] = 'knowledge-graph'
+        ingredient["markup"] = knowledge[product]["query"]["markup"]
+        ingredient["product"] = knowledge[product]["product"]
+        ingredient["product"]["product_parser"] = "knowledge-graph"
 
         # TODO: Remove this remapping once the database handles native IDs
-        if 'id' in ingredient['product']:
-            ingredient['product']['product_id'] = \
-                ingredient['product'].pop('id')
+        if "id" in ingredient["product"]:
+            ingredient["product"]["product_id"] = ingredient["product"].pop("id")
     return ingredients_by_product
 
 
 def get_base_units(quantity):
     dimensionalities = {
         None: pint.Quantity(1),
-        'length': pint.Quantity(1, 'cm'),
-        'volume': pint.Quantity(1, 'ml'),
-        'weight': pint.Quantity(1, 'g'),
+        "length": pint.Quantity(1, "cm"),
+        "volume": pint.Quantity(1, "ml"),
+        "weight": pint.Quantity(1, "g"),
     }
     dimensionalities = {
         v.dimensionality: pint.get_symbol(str(v.units)) if k else None
@@ -183,20 +182,20 @@ def get_base_units(quantity):
 
 def attach_nutrition(ingredients):
     for ingredient in ingredients.values():
-        ingredient['relative_density'] = determine_relative_density(ingredient)
-        ingredient['nutrition'] = determine_nutritional_content(ingredient)
+        ingredient["relative_density"] = determine_relative_density(ingredient)
+        ingredient["nutrition"] = determine_nutritional_content(ingredient)
     return ingredients
 
 
 def attach_markup(ingredients):
     for product, ingredient in ingredients.items():
-        ingredients[product]['markup'] = render(ingredient)
+        ingredients[product]["markup"] = render(ingredient)
     return list(ingredients.values())
 
 
-@app.route('/', methods=['POST'])
+@app.route("/", methods=["POST"])
 def root():
-    descriptions = request.form.getlist('descriptions[]')
+    descriptions = request.form.getlist("descriptions[]")
     descriptions = [d.strip() for d in descriptions]
 
     ingredients_by_product = parse_descriptions(descriptions)
