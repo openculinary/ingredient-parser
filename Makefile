@@ -45,6 +45,8 @@ requirements-dev.txt: requirements.txt requirements-dev.in
 	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-header --quiet requirements-dev.in
 
 lint: venv
+	venv/bin/black --check --quiet tests
+	venv/bin/black --check --quiet web
 	venv/bin/flake8 tests
 	venv/bin/flake8 web
 
