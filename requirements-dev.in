@@ -2,4 +2,4 @@
 black
 flake8
 pytest
-responses
+respx

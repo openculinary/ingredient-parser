@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
+import httpx
 from pint import UnitRegistry
-import requests
 
 from ingreedypy import Ingreedy
 
@@ -146,12 +146,12 @@ def parse_descriptions(descriptions):
 
 
 def retrieve_knowledge(ingredients_by_product):
-    response = requests.post(
+    response = httpx.post(
         url="http://knowledge-graph-service/ingredients/query",
         data={"descriptions[]": list(ingredients_by_product.keys())},
         proxies={},
     )
-    knowledge = response.json()["results"] if response.ok else {}
+    knowledge = response.json()["results"] if response.is_success else {}
     for product in knowledge.keys():
         if knowledge[product]["product"] is None:
             continue

@@ -1,8 +1,6 @@
 import pytest
-import responses
 
 from copy import deepcopy
-import json
 
 from web.app import (
     attach_nutrition,
@@ -41,8 +39,8 @@ def test_parse_description(description, expected):
         assert result[field] == expected[field]
 
 
-@responses.activate
-def test_knowledge_graph_query():
+@pytest.mark.respx(base_url="http://knowledge-graph-service")
+def test_knowledge_graph_query(respx_mock):
     knowledge = {
         "whole onion, diced": {
             "product": {
@@ -123,11 +121,7 @@ def test_knowledge_graph_query():
         },
     }
 
-    responses.add(
-        responses.POST,
-        "http://knowledge-graph-service/ingredients/query",
-        body=json.dumps({"results": knowledge}),
-    )
+    respx_mock.post("/ingredients/query").respond(json={"results": knowledge})
 
     results = retrieve_knowledge(deepcopy(knowledge))
     results = attach_nutrition(results)
