@@ -1,0 +1,4 @@
+[flake8]
+max-line-length=88
+per-file-ignores=
+    reciperadar/ __init__.py:E402,F401
