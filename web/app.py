@@ -74,7 +74,7 @@ def parse_description(description):
     return {
         "description": description,
         "product": {
-            "product_id": None,
+            "id": None,
             "product": product,
             "product_parser": product_parser,
         },
@@ -159,10 +159,6 @@ def retrieve_knowledge(ingredients_by_product):
         ingredient["markup"] = knowledge[product]["query"]["markup"]
         ingredient["product"] = knowledge[product]["product"]
         ingredient["product"]["product_parser"] = "knowledge-graph"
-
-        # TODO: Remove this remapping once the database handles native IDs
-        if "id" in ingredient["product"]:
-            ingredient["product"]["product_id"] = ingredient["product"].pop("id")
     return ingredients_by_product
 
 

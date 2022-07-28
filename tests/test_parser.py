@@ -30,7 +30,7 @@ def ingredient_parser_tests():
 @pytest.mark.parametrize("description, expected", ingredient_parser_tests())
 def test_parse_description(description, expected):
     expected.update({"description": description})
-    expected.update({"product": {"product": expected["product"], "product_id": None}})
+    expected.update({"product": {"product": expected["product"], "id": None}})
 
     result = parse_description(description)
     del result["product"]["product_parser"]
