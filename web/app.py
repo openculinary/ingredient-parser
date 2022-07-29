@@ -26,8 +26,8 @@ def parse_quantity(quantity):
     # Workaround: pint treats 'pinch' as 'pico-inch'
     # https://github.com/hgrecco/pint/issues/273
     if quantity["unit"] == "pinch":
-        quantity["unit"] = "ml"
-        quantity["amount"] = (quantity.get("amount") or 1) * 0.25
+        quantity["unit"] = "g"
+        quantity["amount"] = (quantity.get("amount") or 1) * 0.35
 
     quantity = pint.Quantity(quantity["amount"], quantity["unit"])
     base_units = get_base_units(quantity) or quantity.units

@@ -22,9 +22,8 @@ def request_tests():
         },
         "pinch salt": {
             "product": "salt",
-            "magnitude": 0.25,
-            "units": "ml",
-            "relative_density": 1.0,  # TODO: investigate this value
+            "magnitude": 0.35,
+            "units": "g",
         },
         "2ml olive oil": {
             "product": "olive oil",

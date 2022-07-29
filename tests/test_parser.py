@@ -152,7 +152,7 @@ def test_knowledge_graph_query(respx_mock):
 
 def unit_parser_tests():
     return {
-        "0.25 ml": {
+        "0.35 g": {
             "quantity": [{"amount": 1, "unit": "pinch"}],
             "product": {"product": "paprika"},
         },
