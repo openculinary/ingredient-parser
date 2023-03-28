@@ -15,7 +15,7 @@ deploy:
 	kubectl set image deployments -l app=${SERVICE} ${SERVICE}=${IMAGE_NAME}:${IMAGE_TAG}
 
 image:
-	$(eval container=$(shell buildah from docker.io/library/python:3.10-slim))
+	$(eval container=$(shell buildah from docker.io/library/python:3.11-slim))
 	buildah copy $(container) 'web' 'web'
 	buildah copy $(container) 'requirements.txt'
 	buildah run $(container) -- useradd --home-dir /srv/ --no-create-home gunicorn --shell /sbin/nologin --
