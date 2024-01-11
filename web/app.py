@@ -149,7 +149,7 @@ def retrieve_knowledge(ingredients_by_product):
     response = httpx.post(
         url="http://knowledge-graph-service/ingredients/query",
         data={"descriptions[]": list(ingredients_by_product.keys())},
-        proxies={},
+        proxy=None,
     )
     knowledge = response.json()["results"] if response.is_success else {}
     for product in knowledge.keys():
