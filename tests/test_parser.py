@@ -162,6 +162,6 @@ def unit_parser_tests():
 @pytest.mark.parametrize("expected, ingredient", unit_parser_tests())
 def test_parse_quantity(expected, ingredient):
     quantity, units, parser = parse_quantities(ingredient)
-    result = "{} {}".format(quantity, units)
+    result = f"{quantity} {units}"
 
     assert result == expected
