@@ -41,6 +41,7 @@ def request_tests():
 
 
 @pytest.mark.parametrize("description,expected", request_tests())
+@pytest.mark.respx(base_url="http://knowledge-graph-service")
 def test_request(client, knowledge_graph_stub, description, expected):
     response = client.post("/", data={"descriptions[]": description})
     ingredient = response.json[0]
@@ -53,6 +54,7 @@ def test_request(client, knowledge_graph_stub, description, expected):
         assert ingredient["relative_density"] == expected["relative_density"]
 
 
+@pytest.mark.respx(base_url="http://knowledge-graph-service")
 def test_request_dimensionless(client, knowledge_graph_stub):
     response = client.post("/", data={"descriptions[]": ["1 potato"]})
     ingredient = response.json[0]
@@ -62,6 +64,7 @@ def test_request_dimensionless(client, knowledge_graph_stub):
 
 
 @patch("web.app.parse_quantity")
+@pytest.mark.respx(base_url="http://knowledge-graph-service")
 def test_parse_quantity_failure(parse_quantity, client, knowledge_graph_stub):
     parse_quantity.side_effect = Exception
 
