@@ -11,7 +11,7 @@ app = Flask(__name__)
 pint = UnitRegistry()
 
 
-def generate_subtexts(description):
+def generate_subtexts(language_code, description):
     yield description
     if "/" in description:
         pre_text, post_text = description.split("/", 1)
@@ -22,7 +22,7 @@ def generate_subtexts(description):
     yield description.replace(",", "")
 
 
-def parse_quantity(quantity):
+def parse_quantity(language_code, quantity):
     # Workaround: pint treats 'pinch' as 'pico-inch'
     # https://github.com/hgrecco/pint/issues/273
     if quantity["unit"] == "pinch":
@@ -34,7 +34,7 @@ def parse_quantity(quantity):
     return quantity.to(base_units)
 
 
-def parse_quantities(ingredient):
+def parse_quantities(language_code, ingredient):
     parser = "ingreedypy"
     quantities = ingredient.get("quantity") or []
     if not quantities:
@@ -43,7 +43,7 @@ def parse_quantities(ingredient):
     total = 0
     for quantity in quantities:
         try:
-            total += parse_quantity(quantity)
+            total += parse_quantity(language_code, quantity)
             parser = "ingreedypy+pint"
         except Exception:
             return None, None, parser
@@ -55,20 +55,20 @@ def parse_quantities(ingredient):
     return magnitude, units, parser
 
 
-def parse_description(description):
+def parse_description(language_code, description):
     product = description
     product_parser = None
     magnitude = None
     units = None
     parser = None
 
-    for text in generate_subtexts(description):
+    for text in generate_subtexts(language_code, description):
         ingredient = Ingreedy().parse(text)
         product = ingredient.get("ingredient")
         if not product:
             continue
         product_parser = "ingreedypy"
-        magnitude, units, parser = parse_quantities(ingredient)
+        magnitude, units, parser = parse_quantities(language_code, ingredient)
         break
 
     return {
@@ -133,11 +133,11 @@ def determine_nutritional_content(ingredient):
     return results
 
 
-def parse_descriptions(descriptions):
+def parse_descriptions(language_code, descriptions):
     ingredients_by_product = {}
     for description in descriptions:
         try:
-            ingredient = parse_description(description)
+            ingredient = parse_description(language_code, description)
         except Exception as e:
             raise Exception(f'Parsing failed: "{description}" - {e}')
         product = ingredient["product"]["product"]
@@ -191,10 +191,11 @@ def attach_markup(ingredients):
 
 @app.route("/", methods=["POST"])
 def root():
+    language_code = request.form.get("language_code", type=str, default="en")
     descriptions = request.form.getlist("descriptions[]")
     descriptions = [d.strip() for d in descriptions]
 
-    ingredients_by_product = parse_descriptions(descriptions)
+    ingredients_by_product = parse_descriptions(language_code, descriptions)
     ingredients = retrieve_knowledge(ingredients_by_product)
     ingredients = attach_nutrition(ingredients)
     ingredients = attach_markup(ingredients)

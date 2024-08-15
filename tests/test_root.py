@@ -4,34 +4,34 @@ from unittest.mock import patch
 
 def request_tests():
     return {
-        "100ml red wine": {
+        ("en", "100ml red wine"): {
             "product": "red wine",
             "magnitude": 100,
             "units": "ml",
             "relative_density": 1.0,
         },
-        "1000 grams potatoes": {
+        ("en", "1000 grams potatoes"): {
             "product": "potatoes",
             "magnitude": 1000,
             "units": "g",
         },
-        "2lb 4oz potatoes": {
+        ("en", "2lb 4oz potatoes"): {
             "product": "potatoes",
             "magnitude": 1020.58,
             "units": "g",
         },
-        "pinch salt": {
+        ("en", "pinch salt"): {
             "product": "salt",
             "magnitude": 0.35,
             "units": "g",
         },
-        "2ml olive oil": {
+        ("en", "2ml olive oil"): {
             "product": "olive oil",
             "magnitude": 2,
             "units": "ml",
             "relative_density": 0.9,
         },
-        "20ml sweet & sour": {
+        ("en", "20ml sweet & sour"): {
             "product": "sweet & sour",
             "magnitude": 20,
             "units": "ml",
@@ -40,10 +40,17 @@ def request_tests():
     }.items()
 
 
-@pytest.mark.parametrize("description,expected", request_tests())
+@pytest.mark.parametrize("context, expected", request_tests())
 @pytest.mark.respx(base_url="http://knowledge-graph-service")
-def test_request(client, knowledge_graph_stub, description, expected):
-    response = client.post("/", data={"descriptions[]": description})
+def test_request(client, knowledge_graph_stub, context, expected):
+    language_code, description = context
+    response = client.post(
+        "/",
+        data={
+            "language_code": language_code,
+            "descriptions[]": description,
+        },
+    )
     ingredient = response.json[0]
 
     assert ingredient["product"]["product"] == expected["product"]
@@ -56,7 +63,13 @@ def test_request(client, knowledge_graph_stub, description, expected):
 
 @pytest.mark.respx(base_url="http://knowledge-graph-service")
 def test_request_dimensionless(client, knowledge_graph_stub):
-    response = client.post("/", data={"descriptions[]": ["1 potato"]})
+    response = client.post(
+        "/",
+        data={
+            "language_code": "en",
+            "descriptions[]": ["1 potato"],
+        },
+    )
     ingredient = response.json[0]
 
     assert ingredient["product"]["product"] == "potato"
@@ -68,7 +81,13 @@ def test_request_dimensionless(client, knowledge_graph_stub):
 def test_parse_quantity_failure(parse_quantity, client, knowledge_graph_stub):
     parse_quantity.side_effect = Exception
 
-    response = client.post("/", data={"descriptions[]": ["100ml red wine"]})
+    response = client.post(
+        "/",
+        data={
+            "language_code": "en",
+            "descriptions[]": ["100ml red wine"],
+        },
+    )
     ingredient = response.json[0]
 
     assert "pint" not in ingredient["magnitude_parser"]
