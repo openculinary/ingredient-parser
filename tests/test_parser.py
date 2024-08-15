@@ -12,14 +12,14 @@ from web.app import (
 
 def ingredient_parser_tests():
     return {
-        "tomato": {"product": "tomato", "magnitude": None, "units": None},
-        "1 kilogram beef": {"product": "beef", "magnitude": 1000, "units": "g"},
-        "1kg/2lb 4oz potatoes, cut into 5cm/2in chunks": {
+        ("en", "tomato"): {"product": "tomato", "magnitude": None, "units": None},
+        ("en", "1 kilogram beef"): {"product": "beef", "magnitude": 1000, "units": "g"},
+        ("en", "1kg/2lb 4oz potatoes, cut into 5cm/2in chunks"): {
             "product": "potatoes, cut into 5cm/2in chunks",
             "magnitude": 1000,
             "units": "g",
         },
-        "1-½ ounce, weight vanilla ice cream": {
+        ("en", "1-½ ounce, weight vanilla ice cream"): {
             "product": "weight vanilla ice cream",
             "magnitude": 42.52,
             "units": "g",
@@ -27,12 +27,13 @@ def ingredient_parser_tests():
     }.items()
 
 
-@pytest.mark.parametrize("description, expected", ingredient_parser_tests())
-def test_parse_description(description, expected):
+@pytest.mark.parametrize("context, expected", ingredient_parser_tests())
+def test_parse_description(context, expected):
+    language_code, description = context
     expected.update({"description": description})
     expected.update({"product": {"product": expected["product"], "id": None}})
 
-    result = parse_description(description)
+    result = parse_description(language_code, description)
     del result["product"]["product_parser"]
 
     for field in expected:
@@ -152,16 +153,20 @@ def test_knowledge_graph_query(respx_mock):
 
 def unit_parser_tests():
     return {
-        "0.35 g": {
-            "quantity": [{"amount": 1, "unit": "pinch"}],
-            "product": {"product": "paprika"},
-        },
+        "0.35 g": (
+            "en",
+            {
+                "quantity": [{"amount": 1, "unit": "pinch"}],
+                "product": {"product": "paprika"},
+            },
+        ),
     }.items()
 
 
-@pytest.mark.parametrize("expected, ingredient", unit_parser_tests())
-def test_parse_quantity(expected, ingredient):
-    quantity, units, parser = parse_quantities(ingredient)
+@pytest.mark.parametrize("expected, context", unit_parser_tests())
+def test_parse_quantity(expected, context):
+    language_code, ingredient = context
+    quantity, units, parser = parse_quantities(language_code, ingredient)
     result = f"{quantity} {units}"
 
     assert result == expected
