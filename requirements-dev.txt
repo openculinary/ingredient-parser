@@ -103,8 +103,8 @@ idna==3.7 \
     #   -r requirements.txt
     #   anyio
     #   httpx
-ingreedypy==1.3.6 \
-    --hash=sha256:3d68a32c54ac514dd646214201abd76fbdce4c67c33ada44104bfd4ec80a597d
+ingreedypy==1.3.7 \
+    --hash=sha256:6b3094c7d6141d1f734cb6ed96eca1de5372ca14a47206fa812ddc6d3e4e82e1
     # via -r requirements.txt
 iniconfig==2.0.0 \
     --hash=sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3 \
