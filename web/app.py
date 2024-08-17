@@ -71,6 +71,10 @@ def parse_description(language_code, description):
         magnitude, units, parser = parse_quantities(language_code, ingredient)
         break
 
+    if not product:
+        msg = f"Unable to identify a product from ingredient description {description}"
+        raise ValueError(msg)
+
     return {
         "description": description,
         "product": {
