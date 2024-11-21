@@ -40,10 +40,10 @@ venv/.installed:
 	touch venv/.installed
 
 requirements.txt: requirements.in
-	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-config --no-header --quiet --strip-extras requirements.in
+	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-config --no-header --output-file requirements.txt --quiet --strip-extras requirements.in
 
-requirements-dev.txt: requirements.txt requirements-dev.in
-	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-config --no-header --quiet --strip-extras requirements-dev.in
+requirements-dev.txt: requirements.in requirements-dev.in
+	venv/bin/pip-compile --allow-unsafe --generate-hashes --no-config --no-header --output-file requirements-dev.txt --quiet --strip-extras requirements.in requirements-dev.in
 
 lint: venv
 	venv/bin/black --check --quiet tests
