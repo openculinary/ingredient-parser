@@ -40,7 +40,7 @@ def test_parse_description(context, expected):
         assert result[field] == expected[field]
 
 
-@pytest.mark.respx(base_url="http://knowledge-graph-service")
+@pytest.mark.respx(base_url="http://knowledge-graph-service", using="httpx")
 def test_knowledge_graph_query(respx_mock):
     knowledge = {
         "whole onion, diced": {
