@@ -90,53 +90,6 @@ def parse_description(language_code, description):
     }
 
 
-def determine_relative_density(ingredient):
-    if ingredient.get("units") != "ml":
-        return None
-    product = ingredient["product"]["product"]
-    if "flour" in product:
-        return 0.593
-    elif "sugar" in product:
-        return 0.850
-    elif "milk" in product:
-        return 1.030
-    elif "cream" in product:
-        return 1.010
-    elif "oil" in product:
-        return 0.900
-    elif "butter" in product:
-        return 0.911
-    return 1.0
-
-
-def determine_nutritional_content(ingredient):
-    nutrition = ingredient["product"].pop("nutrition", None)
-    if not nutrition:
-        return None
-    if not ingredient.get("magnitude"):
-        return None
-    if not ingredient.get("units"):
-        return None
-
-    if ingredient["units"] == "g":
-        grams = ingredient["magnitude"]
-    elif ingredient["units"] == "ml":
-        # convert to grams based on density
-        grams = ingredient["magnitude"] * ingredient["relative_density"]
-    else:
-        raise Exception(f"Unknown unit type: {ingredient['units']}")
-
-    results = {}
-    nutrient_units = {"energy": "cal"}
-    for nutrient, quantity in nutrition.items():
-        quantity = quantity or 0
-        ratio = grams / 100.0
-        scaled_quantity = quantity * ratio
-        results[f"{nutrient}"] = round(scaled_quantity, 2)
-        results[f"{nutrient}_units"] = nutrient_units.get(nutrient, "g")
-    return results
-
-
 def parse_descriptions(language_code, descriptions):
     ingredients_by_product = {}
     for description in descriptions:
@@ -180,13 +133,6 @@ def get_base_units(quantity):
     return dimensionalities.get(quantity.dimensionality)
 
 
-def attach_nutrition(ingredients):
-    for ingredient in ingredients.values():
-        ingredient["relative_density"] = determine_relative_density(ingredient)
-        ingredient["nutrition"] = determine_nutritional_content(ingredient)
-    return ingredients
-
-
 def attach_markup(ingredients):
     for product, ingredient in ingredients.items():
         ingredients[product]["markup"] = render(ingredient)
@@ -201,7 +147,6 @@ def root():
 
     ingredients_by_product = parse_descriptions(language_code, descriptions)
     ingredients = retrieve_knowledge(ingredients_by_product)
-    ingredients = attach_nutrition(ingredients)
     ingredients = attach_markup(ingredients)
 
     return jsonify(ingredients)

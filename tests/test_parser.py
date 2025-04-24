@@ -3,7 +3,6 @@ import pytest
 from copy import deepcopy
 
 from web.app import (
-    attach_nutrition,
     parse_description,
     parse_quantities,
     retrieve_knowledge,
@@ -44,46 +43,19 @@ def test_parse_description(context, expected):
 def test_knowledge_graph_query(respx_mock):
     knowledge = {
         "whole onion, diced": {
-            "product": {
-                "product": "onion",
-                "nutrition": {
-                    "protein": 15.0,
-                    "fat": 0.1,
-                    "carbohydrates": 8.0,
-                    "energy": 35.0,
-                    "fibre": 2.0,
-                },
-            },
+            "product": {"product": "onion"},
             "query": {"markup": "whole <mark>onion</mark> diced"},
             "units": "g",
             "magnitude": 110.0,
         },
         "splash of tomato ketchup": {
-            "product": {
-                "product": "tomato ketchup",
-                "nutrition": {
-                    "protein": 1.5,
-                    "fat": 0.1,
-                    "carbohydrates": 28.5,
-                    "energy": 115.0,
-                    "fibre": 1.0,
-                },
-            },
+            "product": {"product": "tomato ketchup"},
             "query": {"markup": "splash of <mark>tomato ketchup</mark>"},
             "units": "ml",
             "magnitude": 3.0,
         },
         "chunk of butter": {
-            "product": {
-                "product": "butter",
-                "nutrition": {
-                    "protein": 0.5,
-                    "fat": 82.0,
-                    "carbohydrates": 0.5,
-                    "energy": 745.0,
-                    "fibre": None,
-                },
-            },
+            "product": {"product": "butter"},
             "query": {"markup": "chunk of <mark>butter</mark>"},
             "units": "ml",
             "magnitude": 25.0,
@@ -98,57 +70,16 @@ def test_knowledge_graph_query(respx_mock):
         },
     }
 
-    expected_nutrition = {
-        "whole onion, diced": {
-            "protein": 16.5,
-            "fat": 0.11,
-            "carbohydrates": 8.8,
-            "energy": 38.5,
-            "fibre": 2.2,
-        },
-        "splash of tomato ketchup": {
-            "protein": 0.04,
-            "fat": 0.0,
-            "carbohydrates": 0.85,
-            "energy": 3.45,
-            "fibre": 0.03,
-        },
-        "chunk of butter": {
-            "protein": round(0.5 * 0.911 / 4, 2),
-            "fat": round(82.0 * 0.911 / 4, 2),
-            "carbohydrates": round(0.5 * 0.911 / 4, 2),
-            "energy": round(745.0 * 0.911 / 4, 2),
-            "fibre": round(0.0 * 0.911 / 4, 2),
-        },
-    }
-
     respx_mock.post("/ingredients/query").respond(json={"results": knowledge})
 
     results = retrieve_knowledge(deepcopy(knowledge))
-    results = attach_nutrition(results)
 
     for description, ingredient in results.items():
         product = ingredient["product"]
         product_expected = knowledge[description]["product"]["product"]
 
-        nutrition = ingredient["nutrition"]
-        nutrition = (
-            None
-            if nutrition is None
-            else {
-                nutrient: amount
-                for nutrient, amount in nutrition.items()
-                if not nutrient.endswith("_units")
-            }
-        )
-        nutrition_expected = expected_nutrition.get(description)
-
-        if ingredient.get("units") == "ml":
-            assert ingredient["relative_density"] is not None
-
         assert product["product"] == product_expected
         assert "graph" in product["product_parser"]
-        assert nutrition == nutrition_expected
 
 
 def unit_parser_tests():

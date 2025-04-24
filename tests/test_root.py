@@ -8,7 +8,6 @@ def request_tests():
             "product": "red wine",
             "magnitude": 100,
             "units": "ml",
-            "relative_density": 1.0,
         },
         ("en", "1000 grams potatoes"): {
             "product": "potatoes",
@@ -29,13 +28,11 @@ def request_tests():
             "product": "olive oil",
             "magnitude": 2,
             "units": "ml",
-            "relative_density": 0.9,
         },
         ("en", "20ml sweet & sour"): {
             "product": "sweet & sour",
             "magnitude": 20,
             "units": "ml",
-            "relative_density": 1.0,
         },
     }.items()
 
@@ -56,9 +53,6 @@ def test_request(client, knowledge_graph_stub, context, expected):
     assert ingredient["product"]["product"] == expected["product"]
     assert ingredient["magnitude"] == expected["magnitude"]
     assert ingredient["units"] == expected["units"]
-
-    if "relative_density" in expected:
-        assert ingredient["relative_density"] == expected["relative_density"]
 
 
 @pytest.mark.respx(base_url="http://knowledge-graph-service", using="httpx")
