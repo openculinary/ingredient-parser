@@ -4,11 +4,11 @@ The RecipeRadar Ingredient Parser takes a set of free-text ingredient descriptio
 
 For example, given the ingredient text: `50ml of water`, the `ingredient-parser` service can indicate that the `product=water`, `units=ml` and `quantity=50`.
 
-This functionality is provided to the [crawler](https://www.github.com/openculinary/crawler) service so that it can extract additional data from each recipe crawled.
+This functionality is provided to the [crawler](https://codeberg.org/openculinary/crawler) service so that it can extract additional data from each recipe crawled.
 
 ## Install dependencies
 
-Make sure to follow the RecipeRadar [infrastructure](https://www.github.com/openculinary/infrastructure) setup to ensure all cluster dependencies are available in your environment.
+Make sure to follow the RecipeRadar [infrastructure](https://codeberg.org/openculinary/infrastructure) setup to ensure all cluster dependencies are available in your environment.
 
 ## Development
 
